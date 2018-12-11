@@ -40,6 +40,10 @@ public:
 	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
 	void ResetInput();
 	void FireWeapon();
+        
+        void SpreeAdd();
+        void SpreeEnd(int Killer);
+        bool IsOnSpree() const { return m_Spree >= 5; }
 
 	void Die(int Killer, int Weapon);
 	bool TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weapon);
@@ -82,6 +86,8 @@ private:
 
 	int m_ReloadTimer;
 	int m_AttackTick;
+        
+        int m_SpawnProtectionTick;
 
 	int m_EmoteType;
 	int m_EmoteStop;
@@ -101,6 +107,8 @@ private:
 
 	int m_Health;
 	int m_Armor;
+        
+        int m_Spree;
 
 	int m_TriggeredEvents;
 

@@ -6,7 +6,7 @@
 #include "character.h"
 #include "laser.h"
 
-CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner)
+CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, bool Laserjump)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER, Pos)
 {
 	m_Owner = Owner;
@@ -14,6 +14,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_Dir = Direction;
 	m_Bounces = 0;
 	m_EvalTick = 0;
+        m_Laserjump = Laserjump;
 	GameWorld()->InsertEntity(this);
 	DoBounce();
 }
@@ -68,6 +69,10 @@ void CLaser::DoBounce()
 				m_Energy = -1;
 
 			GameServer()->CreateSound(m_Pos, SOUND_LASER_BOUNCE);
+                        
+                        if (m_Bounces == 1 && m_Laserjump) {
+                            GameServer()->CreateExplosion(m_Pos, m_Owner, WEAPON_GRENADE, 3);
+                        }
 		}
 	}
 	else

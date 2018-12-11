@@ -98,14 +98,14 @@ MACRO_CONFIG_INT(ClSkipStartMenu, cl_skip_start_menu, 0, 0, 1, CFGFLAG_CLIENT|CF
 // server
 MACRO_CONFIG_INT(SvWarmup, sv_warmup, 0, -1, 1000, CFGFLAG_SAVE|CFGFLAG_SERVER, "Number of seconds to do warmup before match starts (0 disables, -1 all players ready)")
 MACRO_CONFIG_STR(SvMotd, sv_motd, 900, "", CFGFLAG_SAVE|CFGFLAG_SERVER, "Message of the day to display for the clients")
-MACRO_CONFIG_INT(SvTeamdamage, sv_teamdamage, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_SERVER, "Team damage")
+MACRO_CONFIG_INT(SvTeamdamage, sv_teamdamage, 2, 0, 2, CFGFLAG_SAVE|CFGFLAG_SERVER, "Team damage; 1 = Teammates get damage, 2 = Player transfers one health")
 MACRO_CONFIG_STR(SvMaprotation, sv_maprotation, 768, "", CFGFLAG_SAVE|CFGFLAG_SERVER, "Maps to rotate between")
 MACRO_CONFIG_INT(SvMatchesPerMap, sv_matches_per_map, 1, 1, 100, CFGFLAG_SAVE|CFGFLAG_SERVER, "Number of matches on each map before rotating")
 MACRO_CONFIG_INT(SvMatchSwap, sv_match_swap, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_SERVER, "Swap teams between matches")
 MACRO_CONFIG_INT(SvPowerups, sv_powerups, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_SERVER, "Allow powerups like ninja")
 MACRO_CONFIG_INT(SvScorelimit, sv_scorelimit, 20, 0, 1000, CFGFLAG_SAVE|CFGFLAG_SERVER, "Score limit (0 disables)")
 MACRO_CONFIG_INT(SvTimelimit, sv_timelimit, 0, 0, 1000, CFGFLAG_SAVE|CFGFLAG_SERVER, "Time limit in minutes (0 disables)")
-MACRO_CONFIG_STR(SvGametype, sv_gametype, 32, "dm", CFGFLAG_SAVE|CFGFLAG_SERVER, "Game type (dm, tdm, ctf, lms, lts)")
+MACRO_CONFIG_STR(SvGametype, sv_gametype, 32, "vidm", CFGFLAG_SAVE|CFGFLAG_SERVER, "Game type (idm, itdm, ictf, ilms, ilts, vidm, vitdm, victf, vilms, vilts)")
 MACRO_CONFIG_INT(SvTournamentMode, sv_tournament_mode, 0, 0, 2, CFGFLAG_SAVE|CFGFLAG_SERVER, "Tournament mode. When enabled, players joins the server as spectator (2=additional restricted spectator chat)")
 MACRO_CONFIG_INT(SvPlayerReadyMode, sv_player_ready_mode, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_SERVER, "When enabled, players can pause/unpause the game and start the game on warmup via their ready state")
 MACRO_CONFIG_INT(SvSpamprotection, sv_spamprotection, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_SERVER, "Spam protection")
@@ -127,6 +127,9 @@ MACRO_CONFIG_INT(SvVoteSpectateRejoindelay, sv_vote_spectate_rejoindelay, 3, 0, 
 MACRO_CONFIG_INT(SvVoteKick, sv_vote_kick, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_SERVER, "Allow voting to kick players")
 MACRO_CONFIG_INT(SvVoteKickMin, sv_vote_kick_min, 0, 0, MAX_CLIENTS, CFGFLAG_SAVE|CFGFLAG_SERVER, "Minimum number of players required to start a kick vote")
 MACRO_CONFIG_INT(SvVoteKickBantime, sv_vote_kick_bantime, 5, 0, 1440, CFGFLAG_SAVE|CFGFLAG_SERVER, "The time to ban a player if kicked by vote. 0 makes it just use kick")
+
+MACRO_CONFIG_INT(SvVampireMaxHealth, sv_vampire_health, 5, 1, 10, CFGFLAG_SAVE|CFGFLAG_SERVER, "Health limit")
+MACRO_CONFIG_INT(SvLaserjumps, sv_laserjumps, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_SERVER, "1 = Laserjumps")
 
 // debug
 #ifdef CONF_DEBUG // this one can crash the server if not used correctly

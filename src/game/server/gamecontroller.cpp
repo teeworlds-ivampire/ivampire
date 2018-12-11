@@ -20,6 +20,9 @@ IGameController::IGameController(CGameContext *pGameServer)
 	m_aTeamSize[TEAM_RED] = 0;
 	m_aTeamSize[TEAM_BLUE] = 0;
 	m_UnbalancedTick = TBALANCE_OK;
+        
+        m_IsInstagib = false;
+        m_IsVampInstagib = false;
 
 	// game
 	m_GameState = IGS_GAME_RUNNING;
@@ -246,14 +249,9 @@ void IGameController::OnCharacterSpawn(CCharacter *pChr)
 	if(m_GameFlags&GAMEFLAG_SURVIVAL)
 	{
 		// give start equipment
-		pChr->IncreaseHealth(10);
-		pChr->IncreaseArmor(5);
+		pChr->IncreaseHealth(1);
 
-		pChr->GiveWeapon(WEAPON_HAMMER, -1);
-		pChr->GiveWeapon(WEAPON_GUN, 10);
-		pChr->GiveWeapon(WEAPON_SHOTGUN, 10);
-		pChr->GiveWeapon(WEAPON_GRENADE, 10);
-		pChr->GiveWeapon(WEAPON_LASER, 5);
+		pChr->GiveWeapon(WEAPON_LASER, -1);
 
 		// prevent respawn
 		pChr->GetPlayer()->m_RespawnDisabled = GetStartRespawnState();
@@ -261,11 +259,10 @@ void IGameController::OnCharacterSpawn(CCharacter *pChr)
 	else
 	{
 		// default health
-		pChr->IncreaseHealth(10);
+		pChr->IncreaseHealth(m_IsVampInstagib? 1 : 10);
 
 		// give default weapons
-		pChr->GiveWeapon(WEAPON_HAMMER, -1);
-		pChr->GiveWeapon(WEAPON_GUN, 10);
+		pChr->GiveWeapon(WEAPON_LASER, -1);
 	}
 }
 
@@ -275,12 +272,8 @@ void IGameController::OnFlagReturn(CFlag *pFlag)
 
 bool IGameController::OnEntity(int Index, vec2 Pos)
 {
-	// don't add pickups in survival
-	if(m_GameFlags&GAMEFLAG_SURVIVAL)
-	{
-		if(Index < ENTITY_SPAWN || Index > ENTITY_SPAWN_BLUE)
-			return false;
-	}
+        if(Index < ENTITY_SPAWN || Index > ENTITY_SPAWN_BLUE)
+            return false;
 
 	int Type = -1;
 
@@ -829,6 +822,15 @@ void IGameController::CheckGameInfo()
 		UpdateGameInfo(-1);
 }
 
+void IGameController::MakeInstagib(const char* pNewGameType) {
+    m_IsInstagib = true;
+    m_pGameType = pNewGameType;
+}
+void IGameController::MakeVampInstagib(const char* pNewGameType) {
+    m_IsVampInstagib = true;
+    m_pGameType = pNewGameType;    
+}
+
 bool IGameController::IsFriendlyFire(int ClientID1, int ClientID2) const
 {
 	if(ClientID1 == ClientID2)
@@ -839,7 +841,8 @@ bool IGameController::IsFriendlyFire(int ClientID1, int ClientID2) const
 		if(!GameServer()->m_apPlayers[ClientID1] || !GameServer()->m_apPlayers[ClientID2])
 			return false;
 
-		if(!g_Config.m_SvTeamdamage && GameServer()->m_apPlayers[ClientID1]->GetTeam() == GameServer()->m_apPlayers[ClientID2]->GetTeam())
+		if((g_Config.m_SvTeamdamage == 0 || g_Config.m_SvTeamdamage == 2) 
+                        && GameServer()->m_apPlayers[ClientID1]->GetTeam() == GameServer()->m_apPlayers[ClientID2]->GetTeam())
 			return true;
 	}
 
