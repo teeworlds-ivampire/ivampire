@@ -42,7 +42,7 @@ public:
 	void FireWeapon();
         
         void SpreeAdd();
-        void SpreeEnd(int Killer);
+        void SpreeEnd();
         bool IsOnSpree() const { return m_Spree >= 5; }
 
 	void Die(int Killer, int Weapon);

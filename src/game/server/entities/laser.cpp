@@ -69,10 +69,9 @@ void CLaser::DoBounce()
 				m_Energy = -1;
 
 			GameServer()->CreateSound(m_Pos, SOUND_LASER_BOUNCE);
-                        
-                        if (m_Bounces == 1 && m_Laserjump) {
+
+                        if (m_Bounces == 1 && m_Laserjump)
                             GameServer()->CreateExplosion(m_Pos, m_Owner, WEAPON_GRENADE, 3);
-                        }
 		}
 	}
 	else

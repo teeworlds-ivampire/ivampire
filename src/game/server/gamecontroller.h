@@ -101,13 +101,13 @@ protected:
 	int m_RoundCount;
 	int m_SuddenDeath;
 	int m_aTeamscore[NUM_TEAMS];
-        
-        bool m_IsInstagib;
-        bool m_IsVampInstagib;
+
+	bool m_IsInstagib;
+	bool m_IsVampInstagib;
 
 	void EndMatch() { SetGameState(IGS_END_MATCH, TIMER_END); }
 	void EndRound() { SetGameState(IGS_END_ROUND, TIMER_END/2); }
-        
+
 	// info
 	int m_GameFlags;
 	const char *m_pGameType;
@@ -184,11 +184,11 @@ public:
 		else
 			SetGameState(IGS_WARMUP_USER, Seconds);
 	}
-        
-        void MakeInstagib(const char *pNewGameType);
-        bool IsInstagib() const { return m_IsInstagib; }
-        void MakeVampInstagib(const char *pNewGameType);
-        bool IsVampInstagib() const { return m_IsVampInstagib; }
+
+	void MakeInstagib(const char *pNewGameType);
+	bool IsInstagib() const { return m_IsInstagib; }
+	void MakeVampInstagib(const char *pNewGameType);
+	bool IsVampInstagib() const { return m_IsVampInstagib; }
 
 	// general
 	virtual void Snap(int SnappingClient);

@@ -214,43 +214,39 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	Msg.m_TargetID = -1;
 
 	if(Mode == CHAT_ALL)
-            if (str_comp(Msg.m_pMessage, "/info") == 0 || str_comp(Msg.m_pMessage, "/help") == 0) {
-                Msg.m_TargetID = -1;
-                Msg.m_ClientID = -1;
-                
-                char aBufHelpMsg[64];
-                str_format(aBufHelpMsg, sizeof(aBufHelpMsg), "© iVampire Mod (%s) by Slayer.", GAME_MODVERSION);
-                Msg.m_pMessage = aBufHelpMsg;
-                Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-                
-                Msg.m_pMessage = "------------------------------------";
-                Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-                
-                str_format(aBufHelpMsg, sizeof(aBufHelpMsg), "Kill enemies to gain up to %d health.", g_Config.m_SvVampireMaxHealth);
-                Msg.m_pMessage = aBufHelpMsg;
-                Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+    {
+        if (str_comp(Msg.m_pMessage, "/info") == 0 || str_comp(Msg.m_pMessage, "/help") == 0)
+        {
+            Msg.m_TargetID = -1;
+            Msg.m_ClientID = -1;
 
-                Msg.m_pMessage = "Armor indicates your killing spree.";
+            char aBufHelpMsg[64];
+            str_format(aBufHelpMsg, sizeof(aBufHelpMsg), "© iVampire Mod (%s) by Slayer.", GAME_MODVERSION);
+            Msg.m_pMessage = aBufHelpMsg;
+            Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+
+            Msg.m_pMessage = "------------------------------------";
+            Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+
+            str_format(aBufHelpMsg, sizeof(aBufHelpMsg), "Kill enemies to gain up to %d health.", g_Config.m_SvVampireMaxHealth);
+            Msg.m_pMessage = aBufHelpMsg;
+            Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+
+            Msg.m_pMessage = "Armor indicates your killing spree.";
+            Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+
+            Msg.m_pMessage = "Damage stars indicate left health.";
+            Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+
+            if (g_Config.m_SvTeamdamage)
+            {
+                Msg.m_pMessage = g_Config.m_SvTeamdamage == 1? "Friendly fire is on." : "Hit teammates to transfer one health.";
                 Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-
-                Msg.m_pMessage = "Damage stars indicate left health.";
-                Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-
-                
-                if (g_Config.m_SvTeamdamage) {
-                    Msg.m_pMessage = g_Config.m_SvTeamdamage == 1? "Friendly fire is on." : "Hit teammates to transfer one health.";
-                    Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-                }
-
-                /*
-                str_format(aBuf, sizeof(aBuf), "© iVampire Mod (%s) by Slayer.\n------------------------------------\nKill enemies to gain up to %d health.\nArmor indicates your killing spree.\nDamage stars indicate left health.%s"
-                        , GAME_MODVERSION, g_Config.m_SvVampireMaxHealth, (g_Config.m_SvTeamdamage >= 0? (g_Config.m_SvTeamdamage == 1? "\nFriendly fire is on." : "\nHit teammates to transfer one health.") : ""));
-
-                Msg.m_pMessage = aBuf;
-                Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID); */
-            } else {
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
             }
+        }
+        else
+            Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+    }
 	else if(Mode == CHAT_TEAM)
 	{
 		// pack one for the recording only

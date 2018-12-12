@@ -20,9 +20,9 @@ IGameController::IGameController(CGameContext *pGameServer)
 	m_aTeamSize[TEAM_RED] = 0;
 	m_aTeamSize[TEAM_BLUE] = 0;
 	m_UnbalancedTick = TBALANCE_OK;
-        
-        m_IsInstagib = false;
-        m_IsVampInstagib = false;
+
+	m_IsInstagib = false;
+	m_IsVampInstagib = false;
 
 	// game
 	m_GameState = IGS_GAME_RUNNING;
@@ -822,13 +822,15 @@ void IGameController::CheckGameInfo()
 		UpdateGameInfo(-1);
 }
 
-void IGameController::MakeInstagib(const char* pNewGameType) {
-    m_IsInstagib = true;
-    m_pGameType = pNewGameType;
+void IGameController::MakeInstagib(const char* pNewGameType)
+{
+	m_IsInstagib = true;
+	m_pGameType = pNewGameType;
 }
-void IGameController::MakeVampInstagib(const char* pNewGameType) {
-    m_IsVampInstagib = true;
-    m_pGameType = pNewGameType;    
+void IGameController::MakeVampInstagib(const char* pNewGameType)
+{
+	m_IsVampInstagib = true;
+	m_pGameType = pNewGameType;
 }
 
 bool IGameController::IsFriendlyFire(int ClientID1, int ClientID2) const
