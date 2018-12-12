@@ -768,7 +768,7 @@ bool CCharacter::TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weap
 	}
 
 	if(Dmg)
-		m_Health -= GameServer()->m_pController->IsVampInstagib()? 1 : 10;
+		m_Health -= GameServer()->m_pController->IsVampInstagib()? 2 : 10;
 
 	// create healthmod indicator: damage indicators show remaining health
 	if(GameServer()->m_pController->IsVampInstagib() && m_Health > 0)
