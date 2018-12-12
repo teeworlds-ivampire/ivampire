@@ -225,7 +225,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
             Msg.m_pMessage = aBufHelpMsg;
             Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 
-            Msg.m_pMessage = "------------------------------------";
+            Msg.m_pMessage = "———————————————————";
             Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 
             str_format(aBufHelpMsg, sizeof(aBufHelpMsg), "Kill enemies to gain up to %d health.", g_Config.m_SvVampireMaxHealth);
