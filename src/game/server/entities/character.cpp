@@ -691,25 +691,24 @@ void CCharacter::Die(int Killer, int Weapon)
 
 void CCharacter::SpreeAdd()
 {
-	// TODO should not be here
-	const char aaSpreeNoteInstagib[4][32] = { "is on a killing spree", "is on a rampage", "is dominating", "is unstoppable" };
-	const char aaSpreeNoteVamp[4][32] = { "is an unexperienced vampire", "is a skilled vampire", "is a superior vampire", "is a VAMPIRE LORD" };
-
 	++m_Spree;
-	++m_Armor;
+
+	if (++m_Armor > 10)
+		m_Armor = 1;
 
 	if(m_Spree % 5 == 0)
 	{
 		if (g_Config.m_SvKillingSpreeMsg)
 		{
+			static const char aaSpreeNoteInstagib[4][32] = { "is on a killing spree", "is on a rampage", "is dominating", "is unstoppable" };
+			static const char aaSpreeNoteVamp[4][32] = { "is an unexperienced vampire", "is a skilled vampire", "is a superior vampire", "is a VAMPIRE LORD" };
+
 			int p = clamp((int)m_Spree/5 - 1, 0, 3);
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "%s %s with %d kills.", Server()->ClientName(m_pPlayer->GetCID())
 					, GameServer()->m_pController->IsInstagib()? aaSpreeNoteInstagib[p] : aaSpreeNoteVamp[p], m_Spree);
 			GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
 		}
-
-		m_Armor = 0;
 	}
 }
 
