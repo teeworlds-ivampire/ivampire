@@ -748,31 +748,10 @@ bool CCharacter::TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weap
 				++m_Health;
 				GameServer()->CreateDamage(m_Pos, From, Source, m_Health, 0, false);
 				GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_HEARTS);
-
-				// do damage Hit sound
-				// TODO dry
-				if(From >= 0 && From != m_pPlayer->GetCID() && GameServer()->m_apPlayers[From])
-				{
-					int64 Mask = CmaskOne(From);
-					for(int i = 0; i < MAX_CLIENTS; i++)
-					{
-						if(GameServer()->m_apPlayers[i] && (GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS ||  GameServer()->m_apPlayers[i]->m_DeadSpecMode) &&
-							GameServer()->m_apPlayers[i]->GetSpectatorID() == From)
-							Mask |= CmaskOne(i);
-					}
-					GameServer()->CreateSound(GameServer()->m_apPlayers[From]->m_ViewPos, SOUND_HIT, Mask);
-				}
 			}
-			return false;
+			Dmg = 0; // do Hit sound, but no damage calculation etc.
 		}
 	}
-
-	if(Dmg)
-		m_Health -= GameServer()->m_pController->IsVampInstagib()? 2 : 10;
-
-	// create healthmod indicator: damage indicators show remaining health
-	if(GameServer()->m_pController->IsVampInstagib() && m_Health > 0)
-		GameServer()->CreateDamage(m_Pos, m_pPlayer->GetCID(), Source, m_Health, 0, false);
 
 	// do damage Hit sound
 	if(From >= 0 && From != m_pPlayer->GetCID() && GameServer()->m_apPlayers[From])
@@ -787,7 +766,13 @@ bool CCharacter::TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weap
 		GameServer()->CreateSound(GameServer()->m_apPlayers[From]->m_ViewPos, SOUND_HIT, Mask);
 	}
 
-	// check for death
+	if(!Dmg) {
+		return false;
+	}
+
+	m_Health -= GameServer()->m_pController->IsVampInstagib()? 2 : m_Health;
+
+	// check for death, always true for instagib
 	if(m_Health <= 0)
 	{
 		Die(From, Weapon);
@@ -805,6 +790,9 @@ bool CCharacter::TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weap
 
 		return false;
 	}
+
+	// create healthmod indicator: damage indicators show remaining health
+	GameServer()->CreateDamage(m_Pos, m_pPlayer->GetCID(), Source, m_Health, 0, false);
         
 	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_SHORT);
 
