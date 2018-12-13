@@ -265,8 +265,8 @@ void IGameController::OnFlagReturn(CFlag *pFlag)
 
 bool IGameController::OnEntity(int Index, vec2 Pos)
 {
-        if(Index < ENTITY_SPAWN || Index > ENTITY_SPAWN_BLUE)
-            return false;
+	if(Index < ENTITY_SPAWN || Index > ENTITY_SPAWN_BLUE)
+		return false;
 
 	int Type = -1;
 
@@ -836,8 +836,8 @@ bool IGameController::IsFriendlyFire(int ClientID1, int ClientID2) const
 		if(!GameServer()->m_apPlayers[ClientID1] || !GameServer()->m_apPlayers[ClientID2])
 			return false;
 
-		if((g_Config.m_SvTeamdamage == 0 || g_Config.m_SvTeamdamage == 2) 
-                        && GameServer()->m_apPlayers[ClientID1]->GetTeam() == GameServer()->m_apPlayers[ClientID2]->GetTeam())
+		if((g_Config.m_SvTeamdamage == 0 || g_Config.m_SvTeamdamage == 2)
+				&& GameServer()->m_apPlayers[ClientID1]->GetTeam() == GameServer()->m_apPlayers[ClientID2]->GetTeam())
 			return true;
 	}
 

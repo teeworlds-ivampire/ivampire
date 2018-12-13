@@ -63,7 +63,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_LastWeapon = WEAPON_LASER;
 	m_QueuedWeapon = -1;
 
-        m_SpawnProtectionTick = Server()->Tick();
+	m_SpawnProtectionTick = Server()->Tick();
 
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;

@@ -14,7 +14,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_Dir = Direction;
 	m_Bounces = 0;
 	m_EvalTick = 0;
-        m_Laserjump = Laserjump;
+	m_Laserjump = Laserjump;
 	GameWorld()->InsertEntity(this);
 	DoBounce();
 }
@@ -70,8 +70,8 @@ void CLaser::DoBounce()
 
 			GameServer()->CreateSound(m_Pos, SOUND_LASER_BOUNCE);
 
-                        if (m_Bounces == 1 && m_Laserjump)
-                            GameServer()->CreateExplosion(m_Pos, m_Owner, WEAPON_GRENADE, 3);
+			if (m_Bounces == 1 && m_Laserjump)
+				GameServer()->CreateExplosion(m_Pos, m_Owner, WEAPON_GRENADE, 3);
 		}
 	}
 	else

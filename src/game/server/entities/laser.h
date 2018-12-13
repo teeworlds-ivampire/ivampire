@@ -26,7 +26,7 @@ private:
 	int m_Bounces;
 	int m_EvalTick;
 	int m_Owner;
-        bool m_Laserjump;
+	bool m_Laserjump;
 };
 
 #endif

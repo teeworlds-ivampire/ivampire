@@ -215,37 +215,37 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 
 	if(Mode == CHAT_ALL)
     {
-        if (str_comp(Msg.m_pMessage, "/info") == 0 || str_comp(Msg.m_pMessage, "/help") == 0)
-        {
-            Msg.m_TargetID = -1;
-            Msg.m_ClientID = -1;
+		if (str_comp(Msg.m_pMessage, "/info") == 0 || str_comp(Msg.m_pMessage, "/help") == 0)
+		{
+			Msg.m_TargetID = -1;
+			Msg.m_ClientID = -1;
 
-            char aBufHelpMsg[64];
-            str_format(aBufHelpMsg, sizeof(aBufHelpMsg), "© iVampire Mod (%s) by Slayer.", GAME_MODVERSION);
-            Msg.m_pMessage = aBufHelpMsg;
-            Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+			char aBufHelpMsg[64];
+			str_format(aBufHelpMsg, sizeof(aBufHelpMsg), "© iVampire Mod (%s) by Slayer.", GAME_MODVERSION);
+			Msg.m_pMessage = aBufHelpMsg;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 
-            Msg.m_pMessage = "———————————————————";
-            Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+			Msg.m_pMessage = "———————————————————";
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 
-            str_format(aBufHelpMsg, sizeof(aBufHelpMsg), "Kill enemies to gain up to %d health.", g_Config.m_SvVampireMaxHealth);
-            Msg.m_pMessage = aBufHelpMsg;
-            Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+			str_format(aBufHelpMsg, sizeof(aBufHelpMsg), "Kill enemies to gain up to %d health.", g_Config.m_SvVampireMaxHealth);
+			Msg.m_pMessage = aBufHelpMsg;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 
-            Msg.m_pMessage = "Armor indicates your killing spree.";
-            Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+			Msg.m_pMessage = "Armor indicates your killing spree.";
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 
-            Msg.m_pMessage = "Damage stars indicate left health.";
-            Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+			Msg.m_pMessage = "Damage stars indicate left health.";
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 
-            if (g_Config.m_SvTeamdamage)
-            {
-                Msg.m_pMessage = g_Config.m_SvTeamdamage == 1? "Friendly fire is on." : "Hit teammates to transfer one health.";
-                Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-            }
-        }
-        else
-            Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+			if (g_Config.m_SvTeamdamage)
+			{
+				Msg.m_pMessage = g_Config.m_SvTeamdamage == 1? "Friendly fire is on." : "Hit teammates to transfer one health.";
+				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+			}
+		}
+		else
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
     }
 	else if(Mode == CHAT_TEAM)
 	{
@@ -1451,7 +1451,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("remove_vote", "s", CFGFLAG_SERVER, ConRemoveVote, this, "remove a voting option");
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "Clears the voting options");
 	Console()->Register("vote", "r", CFGFLAG_SERVER, ConVote, this, "Force a vote to yes/no");
-        Console()->Register("version", "", CFGFLAG_SERVER, ConVersion, this, "Prints the iVampire-Version");
+	Console()->Register("version", "", CFGFLAG_SERVER, ConVersion, this, "Prints the iVampire-Version");
 }
 
 void CGameContext::OnInit()
@@ -1469,42 +1469,51 @@ void CGameContext::OnInit()
 	m_Collision.Init(&m_Layers);
 
 	// select gametype
-	if(str_comp_nocase(g_Config.m_SvGametype, "ctf") == 0 || str_comp_nocase(g_Config.m_SvGametype, "victf") == 0) {
-            m_pController = new CGameControllerCTF(this);
-            m_pController->MakeVampInstagib("viCTF");
-        }
-	else if(str_comp_nocase(g_Config.m_SvGametype, "lms") == 0 || str_comp_nocase(g_Config.m_SvGametype, "vilms") == 0) {
-            m_pController = new CGameControllerLMS(this);
-            m_pController->MakeVampInstagib("viLMS");
-        }
-	else if(str_comp_nocase(g_Config.m_SvGametype, "lts") == 0 || str_comp_nocase(g_Config.m_SvGametype, "vilts") == 0) {
-            m_pController = new CGameControllerLTS(this);
-            m_pController->MakeVampInstagib("viLTS");
-        }
-	else if(str_comp_nocase(g_Config.m_SvGametype, "tdm") == 0 || str_comp_nocase(g_Config.m_SvGametype, "vitdm") == 0) {
-            m_pController = new CGameControllerTDM(this);
-            m_pController->MakeVampInstagib("viTDM");
-        }
-	else if(str_comp_nocase(g_Config.m_SvGametype, "dm") == 0 || str_comp_nocase(g_Config.m_SvGametype, "vidm") == 0) {
-            m_pController = new CGameControllerDM(this);
-            m_pController->MakeVampInstagib("viDM");
-        }
-	else if(str_comp_nocase(g_Config.m_SvGametype, "ictf") == 0) {
-            m_pController = new CGameControllerCTF(this);
-            m_pController->MakeInstagib("iCTF");
-        }
-	else if(str_comp_nocase(g_Config.m_SvGametype, "itdm") == 0) {
-            m_pController = new CGameControllerTDM(this);
-            m_pController->MakeInstagib("iTDM");
-        }
-	else if(str_comp_nocase(g_Config.m_SvGametype, "idm") == 0) {
-            m_pController = new CGameControllerDM(this);
-            m_pController->MakeInstagib("iDM");
-        }
-	else {
-            m_pController = new CGameControllerDM(this);
-            m_pController->MakeVampInstagib("viDM");
-        }
+	if(str_comp_nocase(g_Config.m_SvGametype, "ctf") == 0 || str_comp_nocase(g_Config.m_SvGametype, "victf") == 0)
+	{
+		m_pController = new CGameControllerCTF(this);
+		m_pController->MakeVampInstagib("viCTF");
+	}
+	else if(str_comp_nocase(g_Config.m_SvGametype, "lms") == 0 || str_comp_nocase(g_Config.m_SvGametype, "vilms") == 0)
+	{
+		m_pController = new CGameControllerLMS(this);
+		m_pController->MakeVampInstagib("viLMS");
+	}
+	else if(str_comp_nocase(g_Config.m_SvGametype, "lts") == 0 || str_comp_nocase(g_Config.m_SvGametype, "vilts") == 0)
+	{
+		m_pController = new CGameControllerLTS(this);
+		m_pController->MakeVampInstagib("viLTS");
+	}
+	else if(str_comp_nocase(g_Config.m_SvGametype, "tdm") == 0 || str_comp_nocase(g_Config.m_SvGametype, "vitdm") == 0)
+	{
+		m_pController = new CGameControllerTDM(this);
+		m_pController->MakeVampInstagib("viTDM");
+	}
+	else if(str_comp_nocase(g_Config.m_SvGametype, "dm") == 0 || str_comp_nocase(g_Config.m_SvGametype, "vidm") == 0)
+	{
+		m_pController = new CGameControllerDM(this);
+		m_pController->MakeVampInstagib("viDM");
+	}
+	else if(str_comp_nocase(g_Config.m_SvGametype, "ictf") == 0)
+	{
+		m_pController = new CGameControllerCTF(this);
+		m_pController->MakeInstagib("iCTF");
+	}
+	else if(str_comp_nocase(g_Config.m_SvGametype, "itdm") == 0)
+	{
+		m_pController = new CGameControllerTDM(this);
+		m_pController->MakeInstagib("iTDM");
+	}
+	else if(str_comp_nocase(g_Config.m_SvGametype, "idm") == 0)
+	{
+		m_pController = new CGameControllerDM(this);
+		m_pController->MakeInstagib("iDM");
+	}
+	else
+	{
+		m_pController = new CGameControllerDM(this);
+		m_pController->MakeVampInstagib("viDM");
+	}
 
 	// create all entities from the game layer
 	CMapItemLayerTilemap *pTileMap = m_Layers.GameLayer();
