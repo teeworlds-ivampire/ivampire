@@ -728,7 +728,7 @@ bool CCharacter::TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weap
 	// no self damage
 	if (Weapon == WEAPON_GRENADE
 			|| From == m_pPlayer->GetCID()
-			|| Server()->Tick() - m_SpawnProtectionTick <= Server()->TickSpeed() * 1.5f) {
+			|| Server()->Tick() - m_SpawnProtectionTick <= Server()->TickSpeed() * 1.0f) {
 		return false;
 	}
 
