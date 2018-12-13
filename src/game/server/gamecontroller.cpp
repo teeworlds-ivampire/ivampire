@@ -246,23 +246,16 @@ int IGameController::OnCharacterDeath(CCharacter *pVictim, CPlayer *pKiller, int
 
 void IGameController::OnCharacterSpawn(CCharacter *pChr)
 {
+	// default health
+	pChr->IncreaseHealth(1);
+
+	// give default weapons
+	pChr->GiveWeapon(WEAPON_LASER, -1);
+
 	if(m_GameFlags&GAMEFLAG_SURVIVAL)
 	{
-		// give start equipment
-		pChr->IncreaseHealth(1);
-
-		pChr->GiveWeapon(WEAPON_LASER, -1);
-
 		// prevent respawn
 		pChr->GetPlayer()->m_RespawnDisabled = GetStartRespawnState();
-	}
-	else
-	{
-		// default health
-		pChr->IncreaseHealth(m_IsVampInstagib? 1 : 10);
-
-		// give default weapons
-		pChr->GiveWeapon(WEAPON_LASER, -1);
 	}
 }
 
