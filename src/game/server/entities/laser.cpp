@@ -62,7 +62,8 @@ void CLaser::DoBounce()
 			m_Pos = TempPos;
 			m_Dir = normalize(TempDir);
 
-			m_Energy -= distance(m_From, m_Pos) + GameServer()->Tuning()->m_LaserBounceCost;
+			float d = distance(m_From, m_Pos);
+			m_Energy -= d + GameServer()->Tuning()->m_LaserBounceCost;
 			m_Bounces++;
 
 			if(m_Bounces > GameServer()->Tuning()->m_LaserBounceNum)
@@ -70,7 +71,7 @@ void CLaser::DoBounce()
 
 			GameServer()->CreateSound(m_Pos, SOUND_LASER_BOUNCE);
 
-			if (m_Bounces == 1 && m_Laserjump)
+			if (m_Laserjump && m_Bounces == 1 && d <= 110.0f)
 				GameServer()->CreateExplosion(m_Pos, m_Owner, WEAPON_GRENADE, 3);
 		}
 	}
