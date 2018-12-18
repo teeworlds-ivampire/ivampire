@@ -221,7 +221,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 			Msg.m_ClientID = -1;
 
 			char aBufHelpMsg[64];
-			str_format(aBufHelpMsg, sizeof(aBufHelpMsg), "© iVampire Mod (%s) by Slayer.", GAME_MODVERSION);
+			str_format(aBufHelpMsg, sizeof(aBufHelpMsg), "© iVampire Mod (%s) by Slayer.", ModVersion());
 			Msg.m_pMessage = aBufHelpMsg;
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 
@@ -1386,13 +1386,6 @@ void CGameContext::ConVote(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
 
-void CGameContext::ConVersion(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "iVampire-Version", GAME_MODVERSION);
-}
-
 void CGameContext::ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -1451,7 +1444,6 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("remove_vote", "s", CFGFLAG_SERVER, ConRemoveVote, this, "remove a voting option");
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "Clears the voting options");
 	Console()->Register("vote", "r", CFGFLAG_SERVER, ConVote, this, "Force a vote to yes/no");
-	Console()->Register("version", "", CFGFLAG_SERVER, ConVersion, this, "Prints the iVampire-Version");
 }
 
 void CGameContext::OnInit()

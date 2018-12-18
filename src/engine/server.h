@@ -97,6 +97,7 @@ public:
 	virtual const char *GameType() const = 0;
 	virtual const char *Version() const = 0;
 	virtual const char *NetVersion() const = 0;
+	virtual const char *ModVersion() const = 0;
 };
 
 extern IGameServer *CreateGameServer();

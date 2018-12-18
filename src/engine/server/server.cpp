@@ -1272,6 +1272,9 @@ int CServer::Run()
 	str_format(aBuf, sizeof(aBuf), "version %s", GameServer()->NetVersion());
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
+	str_format(aBuf, sizeof(aBuf), "mod version %s", GameServer()->ModVersion());
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+
 	// process pending commands
 	m_pConsole->StoreCommands(false);
 
