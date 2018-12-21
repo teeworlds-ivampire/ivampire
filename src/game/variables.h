@@ -131,6 +131,7 @@ MACRO_CONFIG_INT(SvVoteKickBantime, sv_vote_kick_bantime, 5, 0, 1440, CFGFLAG_SA
 MACRO_CONFIG_INT(SvVampireMaxHealth, sv_vampire_health, 6, 1, 10, CFGFLAG_SAVE|CFGFLAG_SERVER, "Health limit")
 MACRO_CONFIG_INT(SvLaserjumps, sv_laserjumps, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_SERVER, "1 = Laserjumps")
 MACRO_CONFIG_INT(SvKillingSpreeMsg, sv_killingspree_msg, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_SERVER, "0 = no killing spree announcements")
+MACRO_CONFIG_INT(SvSpawnProtection, sv_spawn_protection, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_SERVER, "1 = spawnprotection")
 
 // debug
 #ifdef CONF_DEBUG // this one can crash the server if not used correctly
