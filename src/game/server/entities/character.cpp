@@ -702,12 +702,16 @@ void CCharacter::SpreeAdd()
 		{
 			static const char aaSpreeNoteInstagib[4][32] = { "is on a killing spree", "is on a rampage", "is dominating", "is unstoppable" };
 			static const char aaSpreeNoteVamp[4][32] = { "is an unexperienced vampire", "is a skilled vampire", "is a superior vampire", "is a VAMPIRE LORD" };
+			static const char aaSpreeColor[2][4][5] = { { "^999", "^999", "^900", "^900" }, { "^999", "^999", "^009", "^009" } };
+			static const char aaSpreeCounterColor[2][4][5] = { { "^900", "^900", "^999", "^999" }, { "^009", "^009", "^999", "^999" } };
 
 			int p = clamp((int)m_Spree/5 - 1, 0, 3);
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "%s %s with %d kills.", Server()->ClientName(m_pPlayer->GetCID())
-					, GameServer()->m_pController->IsInstagib()? aaSpreeNoteInstagib[p] : aaSpreeNoteVamp[p], m_Spree);
-			GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
+			str_format(aBuf, sizeof(aBuf), "%s%s %s with %s%d %skills.", aaSpreeColor[m_pPlayer->GetTeam()][p], Server()->ClientName(m_pPlayer->GetCID())
+					, GameServer()->m_pController->IsInstagib()? aaSpreeNoteInstagib[p] : aaSpreeNoteVamp[p]
+					, aaSpreeCounterColor[m_pPlayer->GetTeam()][p], m_Spree, aaSpreeColor[m_pPlayer->GetTeam()][p]);
+			GameServer()->SendBroadcast(aBuf, -1);
+			// GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
 		}
 	}
 }
