@@ -809,9 +809,17 @@ void IGameController::DoKillingSpreeTimeouts()
 		if (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
 		{
 			pChr = GameServer()->m_apPlayers[i]->GetCharacter();
-			if (pChr && pChr->GetSpree() > 0
-					&& Server()->Tick() > pChr->GetSpreeTick()+Server()->TickSpeed()*15.0f)
-				pChr->SpreeEnd(true);
+			if (pChr && pChr->GetSpree() > 0)
+			{
+				if (Server()->Tick() > pChr->GetSpreeTick()+Server()->TickSpeed()*15.0f)
+				{
+					pChr->SpreeEnd(true);
+				}
+				else if (Server()->Tick() > pChr->GetSpreeTick()+Server()->TickSpeed()*12.0f)
+				{
+					pChr->IndicateSpreeTimeout();
+				}
+			}
 		}
 	}
 }

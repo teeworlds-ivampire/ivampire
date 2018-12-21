@@ -65,6 +65,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	m_SpawnProtectionTick = Server()->Tick();
 	m_SpreeTick = Server()->Tick();
+	m_SpreeTimeoutTick = Server()->Tick();
 
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
@@ -695,8 +696,9 @@ void CCharacter::SpreeAdd()
 	m_SpreeTick = Server()->Tick();
 	++m_Spree;
 
-	if (++m_Armor > 10)
-		m_Armor = 1;
+	if (++m_SpreeIndicator > 10)
+		m_SpreeIndicator = 1;
+	m_Armor = m_SpreeIndicator;
 
 	if(m_Spree % 5 == 0)
 	{
@@ -720,13 +722,22 @@ void CCharacter::SpreeAdd()
 
 void CCharacter::SpreeEnd(bool Timeout)
 {
-    if (IsOnSpree() && !Timeout)
+    if (m_Spree >= 5 && !Timeout)
     {
         GameServer()->CreateSound(m_Pos, SOUND_GRENADE_EXPLODE);
         GameServer()->CreateExplosion(m_Pos, m_pPlayer->GetCID(), WEAPON_LASER, 0);
     }
-	m_Armor = 0;
+	m_Armor = m_SpreeIndicator = 0;
     m_Spree = 0;
+}
+
+void CCharacter::IndicateSpreeTimeout()
+{
+	if (Server()->Tick() > m_SpreeTimeoutTick+Server()->TickSpeed()*0.5f)
+	{
+		m_SpreeTimeoutTick = Server()->Tick();
+		m_Armor = (m_Armor == m_SpreeIndicator? 0 : m_SpreeIndicator);
+	}
 }
 
 bool CCharacter::TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weapon)
