@@ -42,8 +42,10 @@ public:
 	void FireWeapon();
         
 	void SpreeAdd();
-	void SpreeEnd();
+	void SpreeEnd(bool Timeout);
 	bool IsOnSpree() const { return m_Spree >= 5; }
+	int GetSpree() const { return m_Spree; }
+	int GetSpreeTick() const { return m_SpreeTick; }
 
 	void Die(int Killer, int Weapon);
 	bool TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weapon);
@@ -86,6 +88,7 @@ private:
 
 	int m_ReloadTimer;
 	int m_AttackTick;
+	int m_SpreeTick;
         
 	int m_SpawnProtectionTick;
 

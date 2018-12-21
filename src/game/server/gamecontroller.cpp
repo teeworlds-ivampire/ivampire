@@ -797,6 +797,23 @@ void IGameController::Tick()
 		else
 			DoWincheckMatch();
 	}
+
+	DoKillingSpreeTimeouts();
+}
+
+void IGameController::DoKillingSpreeTimeouts()
+{
+	CCharacter *pChr;
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
+		{
+			pChr = GameServer()->m_apPlayers[i]->GetCharacter();
+			if (pChr && pChr->GetSpree() > 0
+					&& Server()->Tick() > pChr->GetSpreeTick()+Server()->TickSpeed()*15.0f)
+				pChr->SpreeEnd(true);
+		}
+	}
 }
 
 // info

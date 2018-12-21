@@ -121,6 +121,8 @@ protected:
 
 	void UpdateGameInfo(int ClientID);
 
+	void DoKillingSpreeTimeouts();
+
 public:
 	IGameController(class CGameContext *pGameServer);
 	virtual ~IGameController() {};

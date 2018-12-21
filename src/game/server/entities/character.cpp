@@ -64,6 +64,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_QueuedWeapon = -1;
 
 	m_SpawnProtectionTick = Server()->Tick();
+	m_SpreeTick = Server()->Tick();
 
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
@@ -668,7 +669,7 @@ void CCharacter::Die(int Killer, int Weapon)
 			++pKillerChar->m_Health;
 		pKillerChar->SpreeAdd();
 	}
-	SpreeEnd();
+	SpreeEnd(false);
 
 	// send the kill message
 	CNetMsg_Sv_KillMsg Msg;
@@ -691,6 +692,7 @@ void CCharacter::Die(int Killer, int Weapon)
 
 void CCharacter::SpreeAdd()
 {
+	m_SpreeTick = Server()->Tick();
 	++m_Spree;
 
 	if (++m_Armor > 10)
@@ -716,14 +718,14 @@ void CCharacter::SpreeAdd()
 	}
 }
 
-void CCharacter::SpreeEnd()
+void CCharacter::SpreeEnd(bool Timeout)
 {
-    if (IsOnSpree())
+    if (IsOnSpree() && !Timeout)
     {
         GameServer()->CreateSound(m_Pos, SOUND_GRENADE_EXPLODE);
         GameServer()->CreateExplosion(m_Pos, m_pPlayer->GetCID(), WEAPON_LASER, 0);
-        m_Armor = 0;
     }
+	m_Armor = 0;
     m_Spree = 0;
 }
 
