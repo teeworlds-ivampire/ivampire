@@ -142,20 +142,28 @@ bool CIvampireModifier::OnCharacterTakeDamage(CCharacter *pChr, vec2 Source, int
 	int Dmg = IsIVamp()? 2 : pChr->m_Health;
 	CCharacter *pChrFrom = GameServer()->GetPlayerChar(From);
 
-	if(GameServer()->m_pController->IsTeamplay() && IsIVamp() && g_Config.m_SvTeamdamage == 2
+	if(GameServer()->m_pController->IsTeamplay() && g_Config.m_SvTeamdamage == 2
 			&& pChr && pChrFrom && pChr->GetPlayer()->GetTeam() == pChrFrom->GetPlayer()->GetTeam())
 	{
-		// transfer one health to team mate
-		if (pChrFrom->m_Health > 1 && pChr->m_Health < g_Config.m_SvVampireMaxHealth)
+		if(IsIVamp())
 		{
-			--pChrFrom->m_Health;
-			GameServer()->CreateDamage(pChrFrom->m_Pos, From, Source, pChrFrom->m_Health, 0, false);
+			// transfer one health to team mate
+			if (pChrFrom->m_Health > 1 && pChr->m_Health < g_Config.m_SvVampireMaxHealth)
+			{
+				--pChrFrom->m_Health;
+				GameServer()->CreateDamage(pChrFrom->m_Pos, From, Source, pChrFrom->m_Health, 0, false);
 
-			++pChr->m_Health;
-			GameServer()->CreateDamage(pChr->m_Pos, From, Source, pChr->m_Health, 0, false);
-			GameServer()->SendEmoticon(pChr->GetPlayer()->GetCID(), EMOTICON_HEARTS);
+				++pChr->m_Health;
+				GameServer()->CreateDamage(pChr->m_Pos, From, Source, pChr->m_Health, 0, false);
+				GameServer()->SendEmoticon(pChr->GetPlayer()->GetCID(), EMOTICON_HEARTS);
+			}
+			else
+				return false;
+
+			Dmg = 0; // do Hit sound, but no damage calculation etc.
 		}
-		Dmg = 0; // do Hit sound, but no damage calculation etc.
+		else
+			return false;
 	}
 
 	// do damage Hit sound
@@ -304,11 +312,17 @@ bool CIvampireModifier::OnChatMsg(int ChatterClientID, int Mode, int To, const c
 				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 			}
 
-			if (g_Config.m_SvTeamdamage)
+			if (g_Config.m_SvTeamdamage == 1)
 			{
-				Msg.m_pMessage = g_Config.m_SvTeamdamage == 2 && IsIVamp()? "Hit teammates to transfer one health." : "Friendly fire is on.";
+				Msg.m_pMessage = "Friendly fire is on.";
 				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 			}
+			else if (IsIVamp() && g_Config.m_SvTeamdamage == 2)
+			{
+				Msg.m_pMessage = "Hit teammates to transfer one health.";
+				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+			}
+
 
 			Msg.m_pMessage = "Armor indicates your killing spree.";
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
