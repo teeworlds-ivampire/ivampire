@@ -59,13 +59,9 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_EmoteStop = -1;
 	m_LastAction = -1;
 	m_LastNoAmmoSound = -1;
-	m_ActiveWeapon = WEAPON_LASER;
-	m_LastWeapon = WEAPON_LASER;
+	m_ActiveWeapon = WEAPON_GUN;
+	m_LastWeapon = WEAPON_HAMMER;
 	m_QueuedWeapon = -1;
-
-	m_SpawnProtectionTick = Server()->Tick();
-	m_SpreeTick = Server()->Tick();
-	m_SpreeTimeoutTick = Server()->Tick();
 
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
@@ -83,6 +79,9 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_Alive = true;
 
 	GameServer()->m_pController->OnCharacterSpawn(this);
+
+	if(GameServer()->m_IvampireModifier.IsInstagib())
+		GameServer()->m_IvampireModifier.OnCharacterSpawn(this);
 
 	return true;
 }
@@ -383,7 +382,7 @@ void CCharacter::FireWeapon()
 
 		case WEAPON_LASER:
 		{
-			new CLaser(GameWorld(), m_Pos, Direction, GameServer()->Tuning()->m_LaserReach, m_pPlayer->GetCID(), g_Config.m_SvLaserjumps);
+			new CLaser(GameWorld(), m_Pos, Direction, GameServer()->Tuning()->m_LaserReach, m_pPlayer->GetCID());
 			GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE);
 		} break;
 
@@ -652,6 +651,9 @@ bool CCharacter::IncreaseArmor(int Amount)
 
 void CCharacter::Die(int Killer, int Weapon)
 {
+	if(GameServer()->m_IvampireModifier.IsInstagib())
+		GameServer()->m_IvampireModifier.OnCharacterDeath(this, Killer);
+	
 	// we got to wait 0.5 secs before respawning
 	m_Alive = false;
 	m_pPlayer->m_RespawnTick = Server()->Tick()+Server()->TickSpeed()/2;
@@ -662,15 +664,6 @@ void CCharacter::Die(int Killer, int Weapon)
 		Killer, Server()->ClientName(Killer),
 		m_pPlayer->GetCID(), Server()->ClientName(m_pPlayer->GetCID()), Weapon, ModeSpecial);
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-
-	CCharacter* pKillerChar = GameServer()->GetPlayerChar(Killer);
-	if (pKillerChar && !GameServer()->m_pController->IsFriendlyFire(m_pPlayer->GetCID(), Killer))
-	{
-		if(GameServer()->m_pController->IsVampInstagib() && pKillerChar->m_Health < g_Config.m_SvVampireMaxHealth)
-			++pKillerChar->m_Health;
-		pKillerChar->SpreeAdd();
-	}
-	SpreeEnd(false);
 
 	// send the kill message
 	CNetMsg_Sv_KillMsg Msg;
@@ -691,87 +684,48 @@ void CCharacter::Die(int Killer, int Weapon)
 	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID());
 }
 
-void CCharacter::SpreeAdd()
-{
-	m_SpreeTick = Server()->Tick();
-	++m_Spree;
-
-	if (++m_SpreeIndicator > 10)
-		m_SpreeIndicator = 1;
-	m_Armor = m_SpreeIndicator;
-
-	if(m_Spree % 5 == 0)
-	{
-		if (g_Config.m_SvKillingSpreeMsg)
-		{
-			static const char aaSpreeNoteInstagib[4][32] = { "is on a killing spree", "is on a rampage", "is dominating", "is unstoppable" };
-			static const char aaSpreeNoteVamp[4][32] = { "is an unexperienced vampire", "is a skilled vampire", "is a superior vampire", "is a VAMPIRE LORD" };
-			static const char aaSpreeColor[2][4][5] = { { "^999", "^999", "^900", "^900" }, { "^999", "^999", "^009", "^009" } };
-			static const char aaSpreeCounterColor[2][4][5] = { { "^900", "^900", "^999", "^999" }, { "^009", "^009", "^999", "^999" } };
-
-			int p = clamp((int)m_Spree/5 - 1, 0, 3);
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "%s%s %s with %s%d %skills.", aaSpreeColor[m_pPlayer->GetTeam()][p], Server()->ClientName(m_pPlayer->GetCID())
-					, GameServer()->m_pController->IsInstagib()? aaSpreeNoteInstagib[p] : aaSpreeNoteVamp[p]
-					, aaSpreeCounterColor[m_pPlayer->GetTeam()][p], m_Spree, aaSpreeColor[m_pPlayer->GetTeam()][p]);
-			GameServer()->SendBroadcast(aBuf, -1);
-			// GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
-		}
-	}
-}
-
-void CCharacter::SpreeEnd(bool Timeout)
-{
-    if (m_Spree >= 5 && !Timeout)
-    {
-        GameServer()->CreateSound(m_Pos, SOUND_GRENADE_EXPLODE);
-        GameServer()->CreateExplosion(m_Pos, m_pPlayer->GetCID(), WEAPON_LASER, 0);
-    }
-	m_Armor = m_SpreeIndicator = 0;
-    m_Spree = 0;
-}
-
-void CCharacter::IndicateSpreeTimeout()
-{
-	if (Server()->Tick() > m_SpreeTimeoutTick+Server()->TickSpeed()*0.5f)
-	{
-		m_SpreeTimeoutTick = Server()->Tick();
-		m_Armor = (m_Armor == m_SpreeIndicator? 0 : m_SpreeIndicator);
-	}
-}
-
 bool CCharacter::TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weapon)
 {
 	m_Core.m_Vel += Force;
 
-	// laserjumps deal no damage
-	// no self damage
-	if (Weapon == WEAPON_GRENADE
-			|| From == m_pPlayer->GetCID()
-			|| (g_Config.m_SvSpawnProtection && Server()->Tick() - m_SpawnProtectionTick <= Server()->TickSpeed() * 0.8f) ) {
-		return false;
-	}
-
 	if(GameServer()->m_pController->IsFriendlyFire(m_pPlayer->GetCID(), From))
-	{
-		if (!g_Config.m_SvTeamdamage)
-			return false;
-		else if (g_Config.m_SvTeamdamage == 2 && GameServer()->m_pController->IsVampInstagib())
-		{
-			// transfer one health to team mate
-			CCharacter *pChrFrom = GameServer()->GetPlayerChar(From);
-			if (pChrFrom && pChrFrom->m_Health > 1 && m_Health < g_Config.m_SvVampireMaxHealth)
-			{
-				--pChrFrom->m_Health;
-				GameServer()->CreateDamage(pChrFrom->m_Pos, From, Source, pChrFrom->m_Health, 0, false);
+		return false;
 
-				++m_Health;
-				GameServer()->CreateDamage(m_Pos, From, Source, m_Health, 0, false);
-				GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_HEARTS);
+	if(GameServer()->m_IvampireModifier.IsInstagib())
+		return GameServer()->m_IvampireModifier.OnCharacterTakeDamage(this, Source, From, Weapon);
+
+	// m_pPlayer only inflicts half damage on self
+	if(From == m_pPlayer->GetCID())
+		Dmg = max(1, Dmg/2);
+
+	int OldHealth = m_Health, OldArmor = m_Armor;
+	if(Dmg)
+	{
+		if(m_Armor)
+		{
+			if(Dmg > 1)
+			{
+				m_Health--;
+				Dmg--;
 			}
-			Dmg = 0; // do Hit sound, but no damage calculation etc.
+
+			if(Dmg > m_Armor)
+			{
+				Dmg -= m_Armor;
+				m_Armor = 0;
+			}
+			else
+			{
+				m_Armor -= Dmg;
+				Dmg = 0;
+			}
 		}
+
+		m_Health -= Dmg;
 	}
+
+	// create healthmod indicator
+	GameServer()->CreateDamage(m_Pos, m_pPlayer->GetCID(), Source, OldHealth-m_Health, OldArmor-m_Armor, From == m_pPlayer->GetCID());
 
 	// do damage Hit sound
 	if(From >= 0 && From != m_pPlayer->GetCID() && GameServer()->m_apPlayers[From])
@@ -786,13 +740,7 @@ bool CCharacter::TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weap
 		GameServer()->CreateSound(GameServer()->m_apPlayers[From]->m_ViewPos, SOUND_HIT, Mask);
 	}
 
-	if(!Dmg) {
-		return false;
-	}
-
-	m_Health -= GameServer()->m_pController->IsVampInstagib()? 2 : m_Health;
-
-	// check for death, always true for instagib
+	// check for death
 	if(m_Health <= 0)
 	{
 		Die(From, Weapon);
@@ -811,10 +759,10 @@ bool CCharacter::TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weap
 		return false;
 	}
 
-	// create healthmod indicator: damage indicators show remaining health
-	GameServer()->CreateDamage(m_Pos, m_pPlayer->GetCID(), Source, m_Health, 0, false);
-        
-	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_SHORT);
+	if (Dmg > 2)
+		GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG);
+	else
+		GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_SHORT);
 
 	m_EmoteType = EMOTE_PAIN;
 	m_EmoteStop = Server()->Tick() + 500 * Server()->TickSpeed() / 1000;

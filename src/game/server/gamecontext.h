@@ -9,6 +9,8 @@
 #include <game/layers.h>
 #include <game/voting.h>
 
+#include <game/server/gamemodes/ivampire_modifier.h>
+
 #include "eventhandler.h"
 #include "gameworld.h"
 
@@ -60,7 +62,6 @@ class CGameContext : public IGameServer
 	static void ConRemoveVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearVotes(IConsole::IResult *pResult, void *pUserData);
 	static void ConVote(IConsole::IResult *pResult, void *pUserData);
-	static void ConVersion(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSettingUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -178,6 +179,8 @@ public:
 	virtual const char *Version() const;
 	virtual const char *NetVersion() const;
 	virtual const char *ModVersion() const;
+
+	CIvampireModifier m_IvampireModifier;
 };
 
 inline int64 CmaskAll() { return -1; }

@@ -102,9 +102,6 @@ protected:
 	int m_SuddenDeath;
 	int m_aTeamscore[NUM_TEAMS];
 
-	bool m_IsInstagib;
-	bool m_IsVampInstagib;
-
 	void EndMatch() { SetGameState(IGS_END_MATCH, TIMER_END); }
 	void EndRound() { SetGameState(IGS_END_ROUND, TIMER_END/2); }
 
@@ -120,8 +117,6 @@ protected:
 	} m_GameInfo;
 
 	void UpdateGameInfo(int ClientID);
-
-	void DoKillingSpreeTimeouts();
 
 public:
 	IGameController(class CGameContext *pGameServer);
@@ -187,11 +182,6 @@ public:
 			SetGameState(IGS_WARMUP_USER, Seconds);
 	}
 
-	void MakeInstagib(const char *pNewGameType);
-	bool IsInstagib() const { return m_IsInstagib; }
-	void MakeVampInstagib(const char *pNewGameType);
-	bool IsVampInstagib() const { return m_IsVampInstagib; }
-
 	// general
 	virtual void Snap(int SnappingClient);
 	virtual void Tick();
@@ -223,6 +213,9 @@ public:
 	
 	int GetRealPlayerNum() const { return m_aTeamSize[TEAM_RED]+m_aTeamSize[TEAM_BLUE]; }
 	int GetStartTeam();
+
+private:
+	friend class CIvampireModifier;
 };
 
 #endif

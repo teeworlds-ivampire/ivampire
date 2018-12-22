@@ -8,7 +8,7 @@
 class CLaser : public CEntity
 {
 public:
-	CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, bool Laserjump);
+	CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner);
 
 	virtual void Reset();
 	virtual void Tick();
@@ -26,7 +26,8 @@ private:
 	int m_Bounces;
 	int m_EvalTick;
 	int m_Owner;
-	bool m_Laserjump;
+
+	friend class CIvampireModifier;
 };
 
 #endif

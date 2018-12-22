@@ -17,8 +17,6 @@ public:
 	//character's size
 	static const int ms_PhysSize = 28;
 
-	int m_SpreeTimeoutTick;
-
 	CCharacter(CGameWorld *pWorld);
 
 	virtual void Reset();
@@ -43,12 +41,6 @@ public:
 	void ResetInput();
 	void FireWeapon();
         
-	void SpreeAdd();
-	void SpreeEnd(bool Timeout);
-	int GetSpree() const { return m_Spree; }
-	int GetSpreeTick() const { return m_SpreeTick; }
-	void IndicateSpreeTimeout();
-
 	void Die(int Killer, int Weapon);
 	bool TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weapon);
 
@@ -90,9 +82,6 @@ private:
 
 	int m_ReloadTimer;
 	int m_AttackTick;
-	int m_SpreeTick;
-        
-	int m_SpawnProtectionTick;
 
 	int m_EmoteType;
 	int m_EmoteStop;
@@ -113,9 +102,6 @@ private:
 	int m_Health;
 	int m_Armor;
 
-	int m_SpreeIndicator;
-	int m_Spree;
-
 	int m_TriggeredEvents;
 
 	// ninja
@@ -135,6 +121,16 @@ private:
 	CCharacterCore m_SendCore; // core that we should send
 	CCharacterCore m_ReckoningCore; // the dead reckoning core
 
+	
+	// iVampire
+	int m_SpreeIndicator;
+	int m_Spree;
+	int m_SpreeTick;
+	int m_SpreeTimeoutTick;
+
+	int m_SpawnProtectionTick;
+
+	friend class CIvampireModifier;
 };
 
 #endif

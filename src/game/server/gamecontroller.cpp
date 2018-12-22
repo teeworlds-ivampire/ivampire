@@ -21,9 +21,6 @@ IGameController::IGameController(CGameContext *pGameServer)
 	m_aTeamSize[TEAM_BLUE] = 0;
 	m_UnbalancedTick = TBALANCE_OK;
 
-	m_IsInstagib = false;
-	m_IsVampInstagib = false;
-
 	// game
 	m_GameState = IGS_GAME_RUNNING;
 	m_GameStateTimer = TIMER_INFINITE;
@@ -246,16 +243,29 @@ int IGameController::OnCharacterDeath(CCharacter *pVictim, CPlayer *pKiller, int
 
 void IGameController::OnCharacterSpawn(CCharacter *pChr)
 {
-	// default health
-	pChr->IncreaseHealth(1);
-
-	// give default weapons
-	pChr->GiveWeapon(WEAPON_LASER, -1);
-
 	if(m_GameFlags&GAMEFLAG_SURVIVAL)
 	{
+		// give start equipment
+		pChr->IncreaseHealth(10);
+		pChr->IncreaseArmor(5);
+
+		pChr->GiveWeapon(WEAPON_HAMMER, -1);
+		pChr->GiveWeapon(WEAPON_GUN, 10);
+		pChr->GiveWeapon(WEAPON_SHOTGUN, 10);
+		pChr->GiveWeapon(WEAPON_GRENADE, 10);
+		pChr->GiveWeapon(WEAPON_LASER, 5);
+
 		// prevent respawn
 		pChr->GetPlayer()->m_RespawnDisabled = GetStartRespawnState();
+	}
+	else
+	{
+		// default health
+		pChr->IncreaseHealth(10);
+
+		// give default weapons
+		pChr->GiveWeapon(WEAPON_HAMMER, -1);
+		pChr->GiveWeapon(WEAPON_GUN, 10);
 	}
 }
 
@@ -265,8 +275,12 @@ void IGameController::OnFlagReturn(CFlag *pFlag)
 
 bool IGameController::OnEntity(int Index, vec2 Pos)
 {
-	if(Index < ENTITY_SPAWN || Index > ENTITY_SPAWN_BLUE)
-		return false;
+	// don't add pickups in survival
+	if(m_GameFlags&GAMEFLAG_SURVIVAL)
+	{
+		if(Index < ENTITY_SPAWN || Index > ENTITY_SPAWN_BLUE)
+			return false;
+	}
 
 	int Type = -1;
 
@@ -300,6 +314,9 @@ bool IGameController::OnEntity(int Index, vec2 Pos)
 		if(g_Config.m_SvPowerups)
 			Type = PICKUP_NINJA;
 	}
+
+	if(GameServer()->m_IvampireModifier.IsInstagib())
+		return false;
 
 	if(Type != -1)
 	{
@@ -797,31 +814,6 @@ void IGameController::Tick()
 		else
 			DoWincheckMatch();
 	}
-
-	DoKillingSpreeTimeouts();
-}
-
-void IGameController::DoKillingSpreeTimeouts()
-{
-	CCharacter *pChr;
-	for(int i = 0; i < MAX_CLIENTS; ++i)
-	{
-		if (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
-		{
-			pChr = GameServer()->m_apPlayers[i]->GetCharacter();
-			if (pChr && pChr->GetSpree() > 0)
-			{
-				if (Server()->Tick() > pChr->GetSpreeTick()+Server()->TickSpeed()*15.0f)
-				{
-					pChr->SpreeEnd(true);
-				}
-				else if (Server()->Tick() > pChr->GetSpreeTick()+Server()->TickSpeed()*12.0f)
-				{
-					pChr->IndicateSpreeTimeout();
-				}
-			}
-		}
-	}
 }
 
 // info
@@ -840,17 +832,6 @@ void IGameController::CheckGameInfo()
 		UpdateGameInfo(-1);
 }
 
-void IGameController::MakeInstagib(const char* pNewGameType)
-{
-	m_IsInstagib = true;
-	m_pGameType = pNewGameType;
-}
-void IGameController::MakeVampInstagib(const char* pNewGameType)
-{
-	m_IsVampInstagib = true;
-	m_pGameType = pNewGameType;
-}
-
 bool IGameController::IsFriendlyFire(int ClientID1, int ClientID2) const
 {
 	if(ClientID1 == ClientID2)
@@ -861,8 +842,7 @@ bool IGameController::IsFriendlyFire(int ClientID1, int ClientID2) const
 		if(!GameServer()->m_apPlayers[ClientID1] || !GameServer()->m_apPlayers[ClientID2])
 			return false;
 
-		if((g_Config.m_SvTeamdamage == 0 || g_Config.m_SvTeamdamage == 2)
-				&& GameServer()->m_apPlayers[ClientID1]->GetTeam() == GameServer()->m_apPlayers[ClientID2]->GetTeam())
+		if(!g_Config.m_SvTeamdamage && GameServer()->m_apPlayers[ClientID1]->GetTeam() == GameServer()->m_apPlayers[ClientID2]->GetTeam())
 			return true;
 	}
 

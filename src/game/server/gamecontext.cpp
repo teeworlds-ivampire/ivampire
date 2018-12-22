@@ -206,6 +206,8 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 
 	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, aBufMode, aBuf);
 
+	if(m_IvampireModifier.IsInstagib() && m_IvampireModifier.OnChatMsg(ChatterClientID, Mode, To, pText))
+		return;
 
 	CNetMsg_Sv_Chat Msg;
 	Msg.m_Mode = Mode;
@@ -214,48 +216,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	Msg.m_TargetID = -1;
 
 	if(Mode == CHAT_ALL)
-    {
-		if (str_comp_num(Msg.m_pMessage, "/", 1) == 0)
-		{
-			Msg.m_TargetID = -1;
-			Msg.m_ClientID = -1;
-
-			if (str_comp_nocase(Msg.m_pMessage, "/info") == 0 || str_comp_nocase(Msg.m_pMessage, "/help") == 0)
-			{
-				char aBufHelpMsg[64];
-				str_format(aBufHelpMsg, sizeof(aBufHelpMsg), "© iVampire Mod (%s) by Slayer.", ModVersion());
-				Msg.m_pMessage = aBufHelpMsg;
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-
-				Msg.m_pMessage = "———————————————————";
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-
-				str_format(aBufHelpMsg, sizeof(aBufHelpMsg), "Kill enemies to gain up to %d health.", g_Config.m_SvVampireMaxHealth);
-				Msg.m_pMessage = aBufHelpMsg;
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-
-				Msg.m_pMessage = "Armor indicates your killing spree.";
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-
-				Msg.m_pMessage = "Damage stars indicate left health.";
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-
-				if (g_Config.m_SvTeamdamage)
-				{
-					Msg.m_pMessage = g_Config.m_SvTeamdamage == 1? "Friendly fire is on." : "Hit teammates to transfer one health.";
-					Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-				}
-			}
-			else
-			{
-				Msg.m_pMessage = "Unknown command. Type '/help' for more information about this mod.";
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-			}
-		}
-
-		else
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
-    }
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 	else if(Mode == CHAT_TEAM)
 	{
 		// pack one for the recording only
@@ -589,6 +550,9 @@ void CGameContext::OnTick()
 		}
 	}
 #endif
+
+	if(m_IvampireModifier.IsInstagib())
+		m_IvampireModifier.OnTick();
 }
 
 // Server hooks
@@ -1469,52 +1433,23 @@ void CGameContext::OnInit()
 	m_Layers.Init(Kernel());
 	m_Collision.Init(&m_Layers);
 
+	m_IvampireModifier.ScanGametypeForActivation(this, g_Config.m_SvGametype);
+
 	// select gametype
-	if(str_comp_nocase(g_Config.m_SvGametype, "ctf") == 0 || str_comp_nocase(g_Config.m_SvGametype, "victf") == 0)
-	{
+	if(str_comp_nocase(g_Config.m_SvGametype, "mod") == 0)
+		m_pController = new CGameControllerMOD(this);
+	else if(str_comp_nocase(g_Config.m_SvGametype, "ctf") == 0)
 		m_pController = new CGameControllerCTF(this);
-		m_pController->MakeVampInstagib("viCTF");
-	}
-	else if(str_comp_nocase(g_Config.m_SvGametype, "lms") == 0 || str_comp_nocase(g_Config.m_SvGametype, "vilms") == 0)
-	{
+	else if(str_comp_nocase(g_Config.m_SvGametype, "lms") == 0)
 		m_pController = new CGameControllerLMS(this);
-		m_pController->MakeVampInstagib("viLMS");
-	}
-	else if(str_comp_nocase(g_Config.m_SvGametype, "lts") == 0 || str_comp_nocase(g_Config.m_SvGametype, "vilts") == 0)
-	{
+	else if(str_comp_nocase(g_Config.m_SvGametype, "lts") == 0)
 		m_pController = new CGameControllerLTS(this);
-		m_pController->MakeVampInstagib("viLTS");
-	}
-	else if(str_comp_nocase(g_Config.m_SvGametype, "tdm") == 0 || str_comp_nocase(g_Config.m_SvGametype, "vitdm") == 0)
-	{
+	else if(str_comp_nocase(g_Config.m_SvGametype, "tdm") == 0)
 		m_pController = new CGameControllerTDM(this);
-		m_pController->MakeVampInstagib("viTDM");
-	}
-	else if(str_comp_nocase(g_Config.m_SvGametype, "dm") == 0 || str_comp_nocase(g_Config.m_SvGametype, "vidm") == 0)
-	{
-		m_pController = new CGameControllerDM(this);
-		m_pController->MakeVampInstagib("viDM");
-	}
-	else if(str_comp_nocase(g_Config.m_SvGametype, "ictf") == 0)
-	{
-		m_pController = new CGameControllerCTF(this);
-		m_pController->MakeInstagib("iCTF");
-	}
-	else if(str_comp_nocase(g_Config.m_SvGametype, "itdm") == 0)
-	{
-		m_pController = new CGameControllerTDM(this);
-		m_pController->MakeInstagib("iTDM");
-	}
-	else if(str_comp_nocase(g_Config.m_SvGametype, "idm") == 0)
-	{
-		m_pController = new CGameControllerDM(this);
-		m_pController->MakeInstagib("iDM");
-	}
 	else
-	{
 		m_pController = new CGameControllerDM(this);
-		m_pController->MakeVampInstagib("viDM");
-	}
+
+	m_IvampireModifier.OnInit();
 
 	// create all entities from the game layer
 	CMapItemLayerTilemap *pTileMap = m_Layers.GameLayer();
@@ -1605,7 +1540,16 @@ bool CGameContext::IsClientPlayer(int ClientID) const
 	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS ? false : true;
 }
 
-const char *CGameContext::GameType() const { return m_pController && m_pController->GetGameType() ? m_pController->GetGameType() : ""; }
+const char *CGameContext::GameType() const
+{
+	if(m_pController)
+	{
+		if(m_IvampireModifier.IsInstagib()) return m_IvampireModifier.GetGameType();
+		if(m_pController->GetGameType()) return m_pController->GetGameType();
+	}
+	
+	return "";
+}
 const char *CGameContext::Version() const { return GAME_VERSION; }
 const char *CGameContext::NetVersion() const { return GAME_NETVERSION; }
 const char *CGameContext::ModVersion() const { return GAME_MODVERSION; }
