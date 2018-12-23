@@ -147,6 +147,8 @@ bool CIvampireModifier::OnCharacterTakeDamage(CCharacter *pChr, vec2 Source, int
 	{
 		if(IsIVamp())
 		{
+			GameServer()->SendEmoticon(pChr->GetPlayer()->GetCID(), EMOTICON_HEARTS);
+
 			// transfer one health to team mate
 			if (pChrFrom->m_Health > 1 && pChr->m_Health < g_Config.m_SvVampireMaxHealth)
 			{
@@ -155,7 +157,6 @@ bool CIvampireModifier::OnCharacterTakeDamage(CCharacter *pChr, vec2 Source, int
 
 				++pChr->m_Health;
 				GameServer()->CreateDamage(pChr->m_Pos, From, Source, pChr->m_Health, 0, false);
-				GameServer()->SendEmoticon(pChr->GetPlayer()->GetCID(), EMOTICON_HEARTS);
 			}
 			else
 				return false;
@@ -229,7 +230,7 @@ void CIvampireModifier::SpreeAdd(CCharacter *pChr)
 		if (g_Config.m_SvKillingSpreeMsg)
 		{
 			static const char aaSpreeNoteInstagib[4][32] = { "is on a killing spree", "is on a rampage", "is dominating", "is unstoppable" };
-			static const char aaSpreeNoteVamp[4][32] = { "is an unexperienced vampire", "is a skilled vampire", "is a superior vampire", "is a VAMPIRE LORD" };
+			static const char aaSpreeNoteVamp[4][32] = { "is an Ascendant Vampire", "is a Hunter Vampire", "is a Death Dealer", "is a VAMPIRE LORD" };
 			static const char aaSpreeColor[2][4][5] = { { "^999", "^999", "^900", "^900" }, { "^999", "^999", "^009", "^009" } };
 			static const char aaSpreeCounterColor[2][4][5] = { { "^900", "^900", "^999", "^999" }, { "^009", "^009", "^999", "^999" } };
 
