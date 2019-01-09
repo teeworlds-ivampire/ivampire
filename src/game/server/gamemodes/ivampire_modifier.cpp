@@ -274,76 +274,70 @@ bool CIvampireModifier::IsFriendlyFire(int ClientID1, int ClientID2)
 
 bool CIvampireModifier::OnChatMsg(int ChatterClientID, int Mode, int To, const char *pText)
 {
-	if(Mode != CHAT_ALL)
+	if ((Mode != CHAT_ALL && Mode != CHAT_TEAM) || str_comp_num(pText, "/", 1) != 0)
 		return false;
 
-	if (str_comp_num(pText, "/", 1) == 0)
-	{
-		CNetMsg_Sv_Chat Msg;
-		Msg.m_Mode = Mode;
-		Msg.m_pMessage = pText;
-		Msg.m_TargetID = -1;
-		Msg.m_ClientID = -1;
+	CNetMsg_Sv_Chat Msg;
+	Msg.m_Mode = Mode;
+	Msg.m_pMessage = pText;
+	Msg.m_TargetID = -1;
+	Msg.m_ClientID = -1;
 
-		if (str_comp_nocase(Msg.m_pMessage, "/info") == 0 || str_comp_nocase(Msg.m_pMessage, "/help") == 0)
+	if (str_comp_nocase(Msg.m_pMessage, "/info") == 0 || str_comp_nocase(Msg.m_pMessage, "/help") == 0)
+	{
+		char aBufHelpMsg[64];
+		str_format(aBufHelpMsg, sizeof(aBufHelpMsg), "%s Mod (%s) by Slayer.", IsIVamp()? "iVampire" : "Instagib", GameServer()->ModVersion());
+		Msg.m_pMessage = aBufHelpMsg;
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+
+		Msg.m_pMessage = "———————————————————";
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+
+		if(IsIVamp())
 		{
-			char aBufHelpMsg[64];
-			str_format(aBufHelpMsg, sizeof(aBufHelpMsg), "%s Mod (%s) by Slayer.", IsIVamp()? "iVampire" : "Instagib", GameServer()->ModVersion());
+			str_format(aBufHelpMsg, sizeof(aBufHelpMsg), "Kill enemies to gain up to %d health.", g_Config.m_SvVampireMaxHealth);
 			Msg.m_pMessage = aBufHelpMsg;
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-
-			Msg.m_pMessage = "———————————————————";
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-
-			if(IsIVamp())
-			{
-				str_format(aBufHelpMsg, sizeof(aBufHelpMsg), "Kill enemies to gain up to %d health.", g_Config.m_SvVampireMaxHealth);
-				Msg.m_pMessage = aBufHelpMsg;
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-			}
-			else
-			{
-				Msg.m_pMessage = "One-shot your enemies with your laser.";
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-			}
-
-			if(g_Config.m_SvLaserjumps)
-			{
-				Msg.m_pMessage = "Laserjump by hitting near ground.";
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-			}
-
-			if (g_Config.m_SvTeamdamage == 1)
-			{
-				Msg.m_pMessage = "Friendly fire is on.";
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-			}
-			else if (IsIVamp() && g_Config.m_SvTeamdamage == 2)
-			{
-				Msg.m_pMessage = "Hit teammates to transfer one health.";
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-			}
-
-
-			Msg.m_pMessage = "Armor indicates your killing spree.";
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-
-			if(IsIVamp())
-			{
-				Msg.m_pMessage = "Damage stars indicate left health.";
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-			}
 		}
 		else
 		{
-			Msg.m_pMessage = "Unknown command. Type '/help' for more information about this mod.";
+			Msg.m_pMessage = "One-shot your enemies with your laser.";
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 		}
-		return true;
-	}
 
+		if(g_Config.m_SvLaserjumps)
+		{
+			Msg.m_pMessage = "Laserjump by hitting near ground.";
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+		}
+
+		if (g_Config.m_SvTeamdamage == 1)
+		{
+			Msg.m_pMessage = "Friendly fire is on.";
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+		}
+		else if (IsIVamp() && g_Config.m_SvTeamdamage == 2)
+		{
+			Msg.m_pMessage = "Hit teammates to transfer one health.";
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+		}
+
+
+		Msg.m_pMessage = "Armor indicates your killing spree.";
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+
+		if(IsIVamp())
+		{
+			Msg.m_pMessage = "Damage stars indicate left health.";
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+		}
+	}
 	else
-		return false;
+	{
+		Msg.m_pMessage = "Unknown command. Type '/help' for more information about this mod.";
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+	}
+	return true;
 }
 
 bool CIvampireModifier::OnLaserBounce(CLaser *pLaser, vec2 From, vec2 To)
