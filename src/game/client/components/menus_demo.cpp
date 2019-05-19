@@ -8,6 +8,7 @@
 #include <engine/graphics.h>
 #include <engine/textrender.h>
 #include <engine/storage.h>
+#include <engine/shared/config.h>
 
 #include <game/client/render.h>
 #include <game/client/gameclient.h>
@@ -49,7 +50,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	MainView.VSplitRight(450.0f, &MainView, 0);
 
 	if (m_SeekBarActive || m_MenuActive) // only draw the background if SeekBar or Menu is active
-		RenderTools()->DrawUIRect(&MainView, vec4(0.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_T, 10.0f);
+		RenderTools()->DrawUIRect(&MainView, vec4(0.0f, 0.0f, 0.0f, g_Config.m_ClMenuAlpha/100.0f), CUI::CORNER_T, 10.0f);
 
 	MainView.Margin(5.0f, &MainView);
 
@@ -269,11 +270,12 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 int CMenus::DemolistFetchCallback(const char *pName, int IsDir, int StorageType, void *pUser)
 {
 	CMenus *pSelf = (CMenus *)pUser;
-	int Length = str_length(pName);
-	if((pName[0] == '.' && (pName[1] == 0 ||
-		(pName[1] == '.' && pName[2] == 0 && !str_comp(pSelf->m_aCurrentDemoFolder, "demos")))) ||
-		(!IsDir && (Length < 5 || str_comp(pName+Length-5, ".demo"))))
+	if(str_comp(pName, ".") == 0
+		|| (str_comp(pName, "..") == 0 && str_comp(pSelf->m_aCurrentDemoFolder, "demos") == 0)
+		|| (!IsDir && !str_endswith(pName, ".demo")))
+	{
 		return 0;
+	}
 
 	CDemoItem Item;
 	str_copy(Item.m_aFilename, pName, sizeof(Item.m_aFilename));
@@ -284,7 +286,7 @@ int CMenus::DemolistFetchCallback(const char *pName, int IsDir, int StorageType,
 	}
 	else
 	{
-		str_copy(Item.m_aName, pName, min(static_cast<int>(sizeof(Item.m_aName)), Length-4));
+		str_truncate(Item.m_aName, sizeof(Item.m_aName), pName, str_length(pName) - 5);
 		Item.m_InfosLoaded = false;
 	}
 	Item.m_IsDir = IsDir != 0;
@@ -329,7 +331,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 	// cut view
 	MainView.HSplitBottom(80.0f, &MainView, &BottomView);
-	RenderTools()->DrawUIRect(&MainView, vec4(0.0f, 0.0f, 0.0f, ms_BackgroundAlpha), CUI::CORNER_ALL, 5.0f);
+	RenderTools()->DrawUIRect(&MainView, vec4(0.0f, 0.0f, 0.0f, g_Config.m_ClMenuAlpha/100.0f), CUI::CORNER_ALL, 5.0f);
 	BottomView.HSplitTop(20.f, 0, &BottomView);
 
 	static int s_Inited = 0;
@@ -389,7 +391,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			vec4 IconColor = vec4(1, 1, 1, 1);
 			if(!DemoItem.m_IsDir)
 			{
-				IconColor = vec4(0.6, 0.6, 0.6, 1); // not loaded
+				IconColor = vec4(0.6f, 0.6f, 0.6f, 1.0f); // not loaded
 				if(DemoItem.m_Valid && DemoItem.m_InfosLoaded)
 					IconColor = DemoMarkerCount > 0 ? vec4(0.5, 1, 0.5, 1) : vec4(1,1,1,1);
 			}
@@ -492,7 +494,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	float BackgroundWidth = ButtonWidth*(float)NumButtons+(float)(NumButtons-1)*Spacing;
 
 	BottomView.VSplitRight(BackgroundWidth, 0, &BottomView);
-	RenderTools()->DrawUIRect4(&BottomView, vec4(0.0f, 0.0f, 0.0f, 0.25f), vec4(0.0f, 0.0f, 0.0f, 0.25f), vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f), CUI::CORNER_T, 5.0f);
+	RenderTools()->DrawUIRect4(&BottomView, vec4(0.0f, 0.0f, 0.0f, g_Config.m_ClMenuAlpha/100.0f), vec4(0.0f, 0.0f, 0.0f, g_Config.m_ClMenuAlpha/100.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f), CUI::CORNER_T, 5.0f);
 
 	BottomView.HSplitTop(25.0f, &BottomView, 0);
 	BottomView.VSplitLeft(ButtonWidth, &Button, &BottomView);
