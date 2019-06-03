@@ -102,6 +102,7 @@ void CIvampireModifier::OnCharacterSpawn(CCharacter *pChr)
 {
 	// default health
 	pChr->m_Health = 1;
+	pChr->m_Armor = 0;
 
 	pChr->m_aWeapons[WEAPON_HAMMER].m_Got = false;
 	pChr->m_aWeapons[WEAPON_GUN].m_Got = false;
