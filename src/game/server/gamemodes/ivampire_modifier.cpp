@@ -15,55 +15,56 @@ void CIvampireModifier::ScanGametypeForActivation(CGameContext *pGameServer, cha
 {
 	m_pGameServer = pGameServer;
 
+	bool isInstagib = false;
+	bool isIVamp = false;
+	int gameTypeOffset = 0;
+	const int maxGameTypeLen = 30;
+
 	if(str_comp_nocase_num(pGameType, "i", 1) == 0)
 	{
-		m_IsInstagib = true;
-		m_IsIVamp = false;
-		char aTmpStr[32];
-		str_copy(m_aGameType, pGameType, 32);
-		str_copy(aTmpStr, pGameType+1, 31);
-		str_copy(pGameType, aTmpStr, 32);
-
-		// uppercase except i
-		for(int i = 1; i < 32; i++)
-		{
-			if(m_aGameType[i])
-				m_aGameType[i] = str_uppercase(m_aGameType[i]);
-		}
+		isInstagib = true;
+		gameTypeOffset = 1;
 	}
 	else if (str_comp_nocase_num(pGameType, "vi", 2) == 0)
 	{
-		m_IsInstagib = true;
-		m_IsIVamp = true;
-		char aTmpStr[32];
-		str_copy(m_aGameType, pGameType, 32);
-		str_copy(aTmpStr, pGameType+2, 30);
-		str_copy(pGameType, aTmpStr, 32);
-
-		// uppercase except i
-		for(int i = 2; i < 32; i++)
-		{
-			if(m_aGameType[i])
-				m_aGameType[i] = str_uppercase(m_aGameType[i]);
-		}
+		isInstagib = isIVamp = true;
+		gameTypeOffset = 2;
 	}
-	else
+
+	if (!isInstagib)
 	{
 		// vanilla gametypes are not supported for mods
-		m_IsInstagib = true;
-		m_IsIVamp = true;
-		char aTmpStr[32];
-		str_copy(aTmpStr, pGameType, 32);
+		isInstagib = isIVamp = true;
 
 		m_aGameType[0] = 'v';
 		m_aGameType[1] = 'i';
-
-		// uppercase except i
-		for(int i = 0; i < 30; i++)
+		m_aGameType[2] = 0;
+		gameTypeOffset = 2;
+		
+		int i = 0;
+		for(i = 0; i < maxGameTypeLen; ++i)
 		{
-			if(aTmpStr[i])
-				m_aGameType[i+2] = str_uppercase(aTmpStr[i]);
+			if(pGameType[i])
+				m_aGameType[i+gameTypeOffset] = pGameType[i];
 		}
+		m_aGameType[i+gameTypeOffset] = 0;
+	}
+	else
+	{
+		str_copy(m_aGameType, pGameType, maxGameTypeLen);
+		char aTmpStr[32];
+		str_copy(aTmpStr, pGameType+gameTypeOffset, maxGameTypeLen);
+		str_copy(pGameType, aTmpStr, maxGameTypeLen);
+	}
+
+	m_IsInstagib = isInstagib;
+	m_IsIVamp = isIVamp;
+
+	// uppercase except i
+	for(int i = gameTypeOffset; i < maxGameTypeLen; ++i)
+	{
+		if(m_aGameType[i])
+			m_aGameType[i] = str_uppercase(m_aGameType[i]);
 	}
 }
 
