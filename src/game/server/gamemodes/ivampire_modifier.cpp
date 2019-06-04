@@ -77,6 +77,9 @@ void CIvampireModifier::OnInit()
 
 void CIvampireModifier::OnTick()
 {
+	if (!m_IsInstagib)
+		return;
+
 	// do killingspree timeouts
 	CCharacter *pChr;
 	for(int i = 0; i < MAX_CLIENTS; ++i)
@@ -101,6 +104,9 @@ void CIvampireModifier::OnTick()
 
 void CIvampireModifier::OnCharacterSpawn(CCharacter *pChr)
 {
+	if (!m_IsInstagib)
+		return;
+
 	// default health
 	pChr->m_Health = (m_pGameServer->m_pController->m_GameFlags&GAMEFLAG_SURVIVAL)? g_Config.m_SvVampireMaxHealth : 1;
 	pChr->m_Armor  = 0;
@@ -121,6 +127,9 @@ void CIvampireModifier::OnCharacterSpawn(CCharacter *pChr)
 
 void CIvampireModifier::OnCharacterDeath(CCharacter *pChr, int Killer)
 {
+	if (!m_IsInstagib)
+		return;
+
 	CCharacter* pKillerChar = GameServer()->GetPlayerChar(Killer);
 	if (pKillerChar && !GameServer()->m_pController->IsFriendlyFire(pChr->GetPlayer()->GetCID(), Killer))
 	{
@@ -276,6 +285,9 @@ bool CIvampireModifier::IsFriendlyFire(int ClientID1, int ClientID2)
 
 bool CIvampireModifier::OnChatMsg(int ChatterClientID, int Mode, int To, const char *pText)
 {
+	if (!m_IsInstagib)
+		return false;
+
 	if ((Mode != CHAT_ALL && Mode != CHAT_TEAM) || str_comp_num(pText, "/", 1) != 0)
 		return false;
 
@@ -344,6 +356,9 @@ bool CIvampireModifier::OnChatMsg(int ChatterClientID, int Mode, int To, const c
 
 bool CIvampireModifier::OnLaserBounce(CLaser *pLaser, vec2 From, vec2 To)
 {
+	if (!m_IsInstagib)
+		return false;
+
 	if (g_Config.m_SvLaserjumps && pLaser->m_Bounces == 1 && distance(From, To) <= 110.0f)
 	{
 		pLaser->m_Energy = -1;

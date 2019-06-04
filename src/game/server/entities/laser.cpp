@@ -67,7 +67,7 @@ void CLaser::DoBounce()
 			if(m_Bounces > GameServer()->Tuning()->m_LaserBounceNum)
 				m_Energy = -1;
 
-			if(GameServer()->m_IvampireModifier.IsInstagib() && GameServer()->m_IvampireModifier.OnLaserBounce(this, m_From, m_Pos))
+			if(GameServer()->m_IvampireModifier.OnLaserBounce(this, m_From, m_Pos))
 				return;
 
 			GameServer()->CreateSound(m_Pos, SOUND_LASER_BOUNCE);

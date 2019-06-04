@@ -206,7 +206,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 
 	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, aBufMode, aBuf);
 
-	if(m_IvampireModifier.IsInstagib() && m_IvampireModifier.OnChatMsg(ChatterClientID, Mode, To, pText))
+	if(m_IvampireModifier.OnChatMsg(ChatterClientID, Mode, To, pText))
 		return;
 
 	CNetMsg_Sv_Chat Msg;
@@ -565,8 +565,7 @@ void CGameContext::OnTick()
 	}
 #endif
 
-	if(m_IvampireModifier.IsInstagib())
-		m_IvampireModifier.OnTick();
+	m_IvampireModifier.OnTick();
 }
 
 // Server hooks

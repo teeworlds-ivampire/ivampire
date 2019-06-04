@@ -79,9 +79,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_Alive = true;
 
 	GameServer()->m_pController->OnCharacterSpawn(this);
-
-	if(GameServer()->m_IvampireModifier.IsInstagib())
-		GameServer()->m_IvampireModifier.OnCharacterSpawn(this);
+	GameServer()->m_IvampireModifier.OnCharacterSpawn(this);
 
 	return true;
 }
@@ -651,8 +649,7 @@ bool CCharacter::IncreaseArmor(int Amount)
 
 void CCharacter::Die(int Killer, int Weapon)
 {
-	if(GameServer()->m_IvampireModifier.IsInstagib())
-		GameServer()->m_IvampireModifier.OnCharacterDeath(this, Killer);
+	GameServer()->m_IvampireModifier.OnCharacterDeath(this, Killer);
 	
 	// we got to wait 0.5 secs before respawning
 	m_Alive = false;
@@ -691,8 +688,8 @@ bool CCharacter::TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weap
 	if(GameServer()->m_pController->IsFriendlyFire(m_pPlayer->GetCID(), From))
 		return false;
 
-	if(GameServer()->m_IvampireModifier.IsInstagib())
-		return GameServer()->m_IvampireModifier.OnCharacterTakeDamage(this, Source, From, Weapon);
+	if(GameServer()->m_IvampireModifier.IsInstagib()) // OPT this check shouldn't be done here
+		return GameServer()->m_IvampireModifier.OnCharacterTakeDamage(this, Source, Dmg, From, Weapon);
 
 	// m_pPlayer only inflicts half damage on self
 	if(From == m_pPlayer->GetCID())
