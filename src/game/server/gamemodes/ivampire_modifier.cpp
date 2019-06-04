@@ -44,7 +44,7 @@ void CIvampireModifier::ScanGametypeForActivation(CGameContext *pGameServer, cha
 		int i = 0;
 		for(i = 0; i < maxGameTypeLen; ++i)
 		{
-			if(pGameType[i])
+			if (pGameType[i])
 				m_aGameType[i+gameTypeOffset] = pGameType[i];
 		}
 		m_aGameType[i+gameTypeOffset] = 0;
@@ -63,7 +63,7 @@ void CIvampireModifier::ScanGametypeForActivation(CGameContext *pGameServer, cha
 	// uppercase except i
 	for(int i = gameTypeOffset; i < maxGameTypeLen; ++i)
 	{
-		if(m_aGameType[i])
+		if (m_aGameType[i])
 			m_aGameType[i] = str_uppercase(m_aGameType[i]);
 	}
 }
@@ -133,7 +133,7 @@ void CIvampireModifier::OnCharacterDeath(CCharacter *pChr, int Killer)
 	CCharacter* pKillerChar = GameServer()->GetPlayerChar(Killer);
 	if (pKillerChar && !GameServer()->m_pController->IsFriendlyFire(pChr->GetPlayer()->GetCID(), Killer))
 	{
-		if(IsIVamp() && pKillerChar->m_Health < g_Config.m_SvVampireMaxHealth)
+		if (IsIVamp() && pKillerChar->m_Health < g_Config.m_SvVampireMaxHealth)
 			++pKillerChar->m_Health;
 		SpreeAdd(pKillerChar);
 	}
@@ -153,10 +153,10 @@ bool CIvampireModifier::OnCharacterTakeDamage(CCharacter *pChr, vec2 Source, int
 	int Dmg = IsIVamp()? 2 : pChr->m_Health;
 	CCharacter *pChrFrom = GameServer()->GetPlayerChar(From);
 
-	if(GameServer()->m_pController->IsTeamplay() && g_Config.m_SvTeamdamage == 2
+	if (GameServer()->m_pController->IsTeamplay() && g_Config.m_SvTeamdamage == 2
 			&& pChr && pChrFrom && pChr->GetPlayer()->GetTeam() == pChrFrom->GetPlayer()->GetTeam())
 	{
-		if(IsIVamp())
+		if (IsIVamp())
 		{
 			GameServer()->SendEmoticon(pChr->GetPlayer()->GetCID(), EMOTICON_HEARTS);
 
@@ -236,7 +236,7 @@ void CIvampireModifier::SpreeAdd(CCharacter *pChr)
 		pChr->m_SpreeIndicator = 1;
 	pChr->m_Armor = pChr->m_SpreeIndicator;
 
-	if(pChr->m_Spree % 5 == 0)
+	if (pChr->m_Spree % 5 == 0)
 	{
 		if (g_Config.m_SvKillingSpreeMsg)
 		{
@@ -307,7 +307,7 @@ bool CIvampireModifier::OnChatMsg(int ChatterClientID, int Mode, int To, const c
 		Msg.m_pMessage = "———————————————————";
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 
-		if(IsIVamp())
+		if (IsIVamp())
 		{
 			str_format(aBufHelpMsg, sizeof(aBufHelpMsg), "Kill enemies to gain up to %d health.", g_Config.m_SvVampireMaxHealth);
 			Msg.m_pMessage = aBufHelpMsg;
@@ -340,7 +340,7 @@ bool CIvampireModifier::OnChatMsg(int ChatterClientID, int Mode, int To, const c
 		Msg.m_pMessage = "Armor indicates your killing spree.";
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 
-		if(IsIVamp())
+		if (IsIVamp())
 		{
 			Msg.m_pMessage = "Damage stars indicate left health.";
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
