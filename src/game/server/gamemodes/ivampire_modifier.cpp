@@ -15,53 +15,65 @@ void CIvampireModifier::ScanGametypeForActivation(CGameContext *pGameServer, cha
 {
 	m_pGameServer = pGameServer;
 
-	bool isInstagib = false;
-	bool isIVamp = false;
-	int gameTypeOffset = 0;
-	const int maxGameTypeLen = 30;
+	bool IsInstagib = false;
+	bool IsGrenade = false;
+	bool IsIVamp = false;
+	int GameTypeOffset = 0;
+	const int MaxGameTypeLen = 30;
 
-	if(str_comp_nocase_num(pGameType, "i", 1) == 0)
+	if (str_comp_nocase_num(pGameType, "i", 1) == 0)
 	{
-		isInstagib = true;
-		gameTypeOffset = 1;
+		IsInstagib = true;
+		GameTypeOffset = 1;
+	}
+	else if (str_comp_nocase_num(pGameType, "g", 1) == 0)
+	{
+		IsInstagib = IsGrenade = true;
+		GameTypeOffset = 1;
 	}
 	else if (str_comp_nocase_num(pGameType, "vi", 2) == 0)
 	{
-		isInstagib = isIVamp = true;
-		gameTypeOffset = 2;
+		IsInstagib = IsIVamp = true;
+		GameTypeOffset = 2;
+	}
+	else if (str_comp_nocase_num(pGameType, "vg", 2) == 0)
+	{
+		IsInstagib = IsGrenade = IsIVamp = true;
+		GameTypeOffset = 2;
 	}
 
-	if (!isInstagib)
+	if (!IsInstagib)
 	{
 		// vanilla gametypes are not supported for mods
-		isInstagib = isIVamp = true;
+		IsInstagib = IsIVamp = true;
 
 		m_aGameType[0] = 'v';
 		m_aGameType[1] = 'i';
 		m_aGameType[2] = 0;
-		gameTypeOffset = 2;
+		GameTypeOffset = 2;
 		
 		int i = 0;
-		for(i = 0; i < maxGameTypeLen; ++i)
+		for (i = 0; i < MaxGameTypeLen; ++i)
 		{
 			if (pGameType[i])
-				m_aGameType[i+gameTypeOffset] = pGameType[i];
+				m_aGameType[i+GameTypeOffset] = pGameType[i];
 		}
-		m_aGameType[i+gameTypeOffset] = 0;
+		m_aGameType[i+GameTypeOffset] = 0;
 	}
 	else
 	{
-		str_copy(m_aGameType, pGameType, maxGameTypeLen);
+		str_copy(m_aGameType, pGameType, MaxGameTypeLen);
 		char aTmpStr[32];
-		str_copy(aTmpStr, pGameType+gameTypeOffset, maxGameTypeLen);
-		str_copy(pGameType, aTmpStr, maxGameTypeLen);
+		str_copy(aTmpStr, pGameType+GameTypeOffset, MaxGameTypeLen);
+		str_copy(pGameType, aTmpStr, MaxGameTypeLen);
 	}
 
-	m_IsInstagib = isInstagib;
-	m_IsIVamp = isIVamp;
+	m_IsInstagib = IsInstagib;
+	m_IsGrenade = IsGrenade;
+	m_IsIVamp = IsIVamp;
 
 	// uppercase except i
-	for(int i = gameTypeOffset; i < maxGameTypeLen; ++i)
+	for (int i = GameTypeOffset; i < MaxGameTypeLen; ++i)
 	{
 		if (m_aGameType[i])
 			m_aGameType[i] = str_uppercase(m_aGameType[i]);
@@ -82,7 +94,7 @@ void CIvampireModifier::OnTick()
 
 	// do killingspree timeouts
 	CCharacter *pChr;
-	for(int i = 0; i < MAX_CLIENTS; ++i)
+	for (int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		if (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
 		{
@@ -115,10 +127,14 @@ void CIvampireModifier::OnCharacterSpawn(CCharacter *pChr)
 	pChr->m_aWeapons[WEAPON_GUN].m_Got = false;
 	pChr->m_aWeapons[WEAPON_SHOTGUN].m_Got = false;
 	pChr->m_aWeapons[WEAPON_GRENADE].m_Got = false;
-	
-	pChr->GiveWeapon(WEAPON_LASER, -1);
-	pChr->m_ActiveWeapon = WEAPON_LASER;
-	pChr->m_LastWeapon = WEAPON_LASER;
+	pChr->m_aWeapons[WEAPON_LASER].m_Got = false;
+
+	const int InstagibWeapon = m_IsGrenade? WEAPON_GRENADE : WEAPON_LASER;
+
+	pChr->m_aWeapons[InstagibWeapon].m_Got = true;
+	pChr->GiveWeapon(InstagibWeapon, m_IsGrenade? g_Config.m_SvGrenadeAmmo : -1);
+	pChr->m_ActiveWeapon = InstagibWeapon;
+	pChr->m_LastWeapon = InstagibWeapon;
 
 	pChr->m_SpawnProtectionTick = Server()->Tick();
 	pChr->m_SpreeTick = Server()->Tick();
@@ -140,17 +156,18 @@ void CIvampireModifier::OnCharacterDeath(CCharacter *pChr, int Killer)
 	SpreeEnd(pChr, false);
 }
 
-bool CIvampireModifier::OnCharacterTakeDamage(CCharacter *pChr, vec2 Source, int From, int Weapon)
+bool CIvampireModifier::OnCharacterTakeDamage(CCharacter *pChr, vec2 Source, int Dmg, int From, int Weapon)
 {
-	// laserjumps deal no damage
+	// laserjumps (WEAPON_HAMMER) deal no damage
 	// no self damage
-	if (Weapon == WEAPON_GRENADE
+	if (Weapon == WEAPON_HAMMER
+			|| (Weapon == WEAPON_GRENADE && Dmg < g_Config.m_SvGrenadeKillThreshold)
 			|| From == pChr->GetPlayer()->GetCID()
 			|| (g_Config.m_SvSpawnProtection && Server()->Tick() - pChr->m_SpawnProtectionTick <= Server()->TickSpeed() * 0.8f) ) {
 		return false;
 	}
 
-	int Dmg = IsIVamp()? 2 : pChr->m_Health;
+	int DmgDmg = IsIVamp()? 2 : pChr->m_Health;
 	CCharacter *pChrFrom = GameServer()->GetPlayerChar(From);
 
 	if (GameServer()->m_pController->IsTeamplay() && g_Config.m_SvTeamdamage == 2
@@ -172,7 +189,7 @@ bool CIvampireModifier::OnCharacterTakeDamage(CCharacter *pChr, vec2 Source, int
 			else
 				return false;
 
-			Dmg = 0; // do Hit sound, but no damage calculation etc.
+			DmgDmg = 0; // do Hit sound, but no damage calculation etc.
 		}
 		else
 			return false;
@@ -191,11 +208,11 @@ bool CIvampireModifier::OnCharacterTakeDamage(CCharacter *pChr, vec2 Source, int
 		GameServer()->CreateSound(GameServer()->m_apPlayers[From]->m_ViewPos, SOUND_HIT, Mask);
 	}
 
-	if(!Dmg) {
+	if(!DmgDmg) {
 		return false;
 	}
 
-	pChr->m_Health -= Dmg;
+	pChr->m_Health -= DmgDmg;
 
 	// check for death, always true for instagib
 	if(pChr->m_Health <= 0)
@@ -284,6 +301,39 @@ bool CIvampireModifier::IsFriendlyFire(int ClientID1, int ClientID2)
 			&& GameServer()->m_apPlayers[ClientID1]->GetTeam() == GameServer()->m_apPlayers[ClientID2]->GetTeam());
 }
 
+void CIvampireModifier::OnCharacterHandleWeapons(CCharacter *pChr)
+{
+	if (!m_IsInstagib)
+		return;
+
+	if (!m_IsGrenade)
+		return;
+
+	// ammo regen
+	int AmmoRegenTime = g_Config.m_SvGrenadeAmmoRegen;
+	if(AmmoRegenTime && pChr->m_aWeapons[pChr->m_ActiveWeapon].m_Ammo >= 0)
+	{
+		// If equipped and not active, regen ammo?
+		if (pChr->m_ReloadTimer <= 0)
+		{
+			if (pChr->m_aWeapons[pChr->m_ActiveWeapon].m_AmmoRegenStart < 0)
+				pChr->m_aWeapons[pChr->m_ActiveWeapon].m_AmmoRegenStart = Server()->Tick();
+
+			if ((Server()->Tick() - pChr->m_aWeapons[pChr->m_ActiveWeapon].m_AmmoRegenStart) >= AmmoRegenTime * Server()->TickSpeed() / 1000)
+			{
+				// Add some ammo
+				pChr->m_aWeapons[pChr->m_ActiveWeapon].m_Ammo = min(pChr->m_aWeapons[pChr->m_ActiveWeapon].m_Ammo + 1,
+					g_Config.m_SvGrenadeAmmo);
+				pChr->m_aWeapons[pChr->m_ActiveWeapon].m_AmmoRegenStart = -1;
+			}
+		}
+		else
+		{
+			pChr->m_aWeapons[pChr->m_ActiveWeapon].m_AmmoRegenStart = -1;
+		}
+	}
+}
+
 bool CIvampireModifier::OnChatMsg(int ChatterClientID, int Mode, int To, const char *pText)
 {
 	if (!m_IsInstagib)
@@ -316,11 +366,11 @@ bool CIvampireModifier::OnChatMsg(int ChatterClientID, int Mode, int To, const c
 		}
 		else
 		{
-			Msg.m_pMessage = "One-shot your enemies with your laser.";
+			Msg.m_pMessage = "One-shot your enemies.";
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 		}
 
-		if(g_Config.m_SvLaserjumps)
+		if (g_Config.m_SvLaserjumps && !m_IsGrenade)
 		{
 			Msg.m_pMessage = "Laserjump by hitting near ground.";
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
@@ -363,7 +413,7 @@ bool CIvampireModifier::OnLaserBounce(CLaser *pLaser, vec2 From, vec2 To)
 	if (g_Config.m_SvLaserjumps && pLaser->m_Bounces == 1 && distance(From, To) <= 110.0f)
 	{
 		pLaser->m_Energy = -1;
-		GameServer()->CreateExplosion(To, pLaser->m_Owner, WEAPON_GRENADE, 3);
+		GameServer()->CreateExplosion(To, pLaser->m_Owner, WEAPON_HAMMER, 3);
 		GameServer()->CreateSound(pLaser->m_Pos, SOUND_GRENADE_EXPLODE);
 		return true;
 	}

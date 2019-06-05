@@ -409,6 +409,8 @@ void CCharacter::FireWeapon()
 
 void CCharacter::HandleWeapons()
 {
+	GameServer()->m_IvampireModifier.OnCharacterHandleWeapons(this);
+
 	//ninja
 	HandleNinja();
 

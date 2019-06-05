@@ -14,6 +14,7 @@ struct CIvampireModifier
 	class IServer *m_pServer;
 	
 	bool m_IsInstagib;
+	bool m_IsGrenade;
 	bool m_IsIVamp;
 	char m_aGameType[64];
 
@@ -21,6 +22,7 @@ struct CIvampireModifier
 	{
 		m_pGameServer = 0;
 		m_IsInstagib = false;
+		m_IsGrenade = false;
 		m_IsIVamp = false;
 	}
 
@@ -38,8 +40,9 @@ struct CIvampireModifier
 	void OnInit();
 	void OnTick();
 	void OnCharacterSpawn(CCharacter *pChr);
-	bool OnCharacterTakeDamage(CCharacter *pChr, vec2 Source, int FromCID, int Weapon);
+	bool OnCharacterTakeDamage(CCharacter *pChr, vec2 Source, int Dmg, int FromCID, int Weapon);
 	void OnCharacterDeath(CCharacter *pChr, int Killer);
+	void OnCharacterHandleWeapons(CCharacter *pChr);
 	bool OnChatMsg(int ChatterClientID, int Mode, int To, const char *pText);
 	bool OnLaserBounce(CLaser *pLaser, vec2 From, vec2 To);
 
