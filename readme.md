@@ -19,7 +19,7 @@ Features
 (Only when you have more than 1 health point, you cant suicide this way)
 
 ### General features
-* Instagib
+* (Laser) Instagib and Grenade Instagib
 * Laser Jumps: The laser will explode upon hitting a near wall, dealing no damage but pushing you away
 * Spawn Protection: You can not be killed right after spawning, to prevent spawn camping.
 * Killing Sprees: The armor bar indicates your subsequent kills. You have to kill every 15 s, or your spree runs out. Every 5 kills your spree level increases, and a colored broadcast message with your name appears (cool!).
