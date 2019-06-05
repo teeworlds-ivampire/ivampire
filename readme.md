@@ -28,7 +28,7 @@ Building etc.
 ---------
 Please visit the ![Teeworlds project](https://github.com/teeworlds/teeworlds/) for more information.
 
-Teeworlds [![CircleCI](https://circleci.com/gh/teeworlds/teeworlds.svg?style=svg)](https://circleci.com/gh/teeworlds/teeworlds) 
+Teeworlds
 =========
 
 A retro multiplayer shooter
