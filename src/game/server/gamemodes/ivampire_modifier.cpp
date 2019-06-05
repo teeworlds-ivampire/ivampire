@@ -243,12 +243,13 @@ void CIvampireModifier::SpreeAdd(CCharacter *pChr)
 			static const char aaSpreeNoteInstagib[4][32] = { "is on a killing spree", "is on a rampage", "is dominating", "is unstoppable" };
 			static const char aaSpreeNoteVamp[4][32] = { "is an Ascendant Vampire", "is a Hunter Vampire", "is a Death Dealer", "is a VAMPIRE LORD" };
 			static const char aaSpreeColor[2][4][5] = { { "^999", "^999", "^900", "^900" }, { "^999", "^999", "^009", "^009" } };
+			static const char aaSpreeNameColor[2][4][5] = { { "^900", "^900", "^999", "^999" }, { "^009", "^009", "^999", "^999" } };
 			static const char aaSpreeCounterColor[2][4][5] = { { "^900", "^900", "^999", "^999" }, { "^009", "^009", "^999", "^999" } };
 
 			int p = clamp((int)pChr->m_Spree/5 - 1, 0, 3);
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "%s%s %s with %s%d %skills.", aaSpreeColor[pChr->GetPlayer()->GetTeam()][p], Server()->ClientName(pChr->GetPlayer()->GetCID())
-					, IsIVamp()? aaSpreeNoteVamp[p] : aaSpreeNoteInstagib[p]
+			str_format(aBuf, sizeof(aBuf), "%s%s %s%s with %s%d %skills.", aaSpreeNameColor[pChr->GetPlayer()->GetTeam()][p], Server()->ClientName(pChr->GetPlayer()->GetCID())
+					, aaSpreeColor[pChr->GetPlayer()->GetTeam()][p], IsIVamp()? aaSpreeNoteVamp[p] : aaSpreeNoteInstagib[p]
 					, aaSpreeCounterColor[pChr->GetPlayer()->GetTeam()][p], pChr->m_Spree, aaSpreeColor[pChr->GetPlayer()->GetTeam()][p]);
 			GameServer()->SendBroadcast(aBuf, -1);
 		}
