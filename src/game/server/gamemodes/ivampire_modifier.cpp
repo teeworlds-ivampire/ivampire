@@ -120,7 +120,7 @@ void CIvampireModifier::OnCharacterSpawn(CCharacter *pChr)
 		return;
 
 	// default health
-	pChr->m_Health = (m_pGameServer->m_pController->m_GameFlags&GAMEFLAG_SURVIVAL)? g_Config.m_SvVampireMaxHealth : 1;
+	pChr->m_Health = (m_IsIVamp && m_pGameServer->m_pController->m_GameFlags&GAMEFLAG_SURVIVAL)? g_Config.m_SvVampireMaxHealth : 1;
 	pChr->m_Armor  = 0;
 
 	pChr->m_aWeapons[WEAPON_HAMMER].m_Got = false;
