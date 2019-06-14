@@ -8,6 +8,6 @@
 #define CLIENT_VERSION 0x0703
 static const char GAME_RELEASE_VERSION[8] = "0.7.3.1";
 
-#define GAME_MODVERSION "3.3"
+#define GAME_MODVERSION "3.4-dev"
 
 #endif
