@@ -72,12 +72,35 @@ void CIvampireModifier::ScanGametypeForActivation(CGameContext *pGameServer, cha
 	m_IsGrenade = IsGrenade;
 	m_IsIVamp = IsIVamp;
 
+	if (!IsGameTypeSupported(pGameType)) {
+		MakeDefaultGameType(pGameType);
+	}
+
 	// uppercase except i
 	for (int i = GameTypeOffset; i < MaxGameTypeLen; ++i)
 	{
 		if (m_aGameType[i])
 			m_aGameType[i] = str_uppercase(m_aGameType[i]);
 	}
+}
+
+bool CIvampireModifier::IsGameTypeSupported(char *pGameType)
+{
+	return (str_comp_nocase(pGameType, "mod") == 0
+			|| str_comp_nocase(pGameType, "ctf") == 0
+			|| str_comp_nocase(pGameType, "lms") == 0
+			|| str_comp_nocase(pGameType, "lts") == 0
+			|| str_comp_nocase(pGameType, "tdm") == 0
+			|| str_comp_nocase(pGameType, "dm") == 0);
+}
+
+void CIvampireModifier::MakeDefaultGameType(char *pGameType)
+{
+	const int GameTypeOffset = m_IsIVamp? 2 : 1;
+
+	pGameType[0] = m_aGameType[GameTypeOffset] = 'd';
+	pGameType[1] = m_aGameType[GameTypeOffset+1] = 'm';
+	pGameType[2] = m_aGameType[GameTypeOffset+2] = 0;
 }
 
 void CIvampireModifier::OnInit()

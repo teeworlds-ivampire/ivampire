@@ -36,6 +36,8 @@ struct CIvampireModifier
 	bool IsFriendlyFire(int ClientID1, int ClientID2);
 	
 	void ScanGametypeForActivation(CGameContext *pGameServer, char *pGameType);
+	bool IsGameTypeSupported(char *pGameType);
+	void MakeDefaultGameType(char *pGameType);
 
 	void OnInit();
 	void OnTick();
